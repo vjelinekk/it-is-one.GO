@@ -6,18 +6,21 @@ import (
 
 	"github.com/go-chi/chi/v5"
 	"github.com/go-chi/chi/v5/middleware"
+	"gorm.io/gorm"
 
 	"github.com/vjelinekk/it-is-one.GO/pkg/api"
 )
 
 type Server struct {
 	addr   string
+	db     *gorm.DB
 	router *chi.Mux
 }
 
-func New(addr string) *Server {
+func New(addr string, db *gorm.DB) *Server {
 	s := &Server{
 		addr:   addr,
+		db:     db,
 		router: chi.NewRouter(),
 	}
 	s.setupRoutes()
@@ -33,6 +36,16 @@ func (s *Server) setupRoutes() {
 
 	// Set a timeout value on the request context
 	s.router.Use(middleware.Timeout(60 * time.Second))
+
+	// User CRUD routes
+	userHandler := api.NewUserHandler(s.db)
+	s.router.Route("/users", func(r chi.Router) {
+		r.Post("/", userHandler.Create)      // Create
+		r.Get("/", userHandler.List)        // Read All
+		r.Get("/{id}", userHandler.Get)     // Read One
+		r.Put("/{id}", userHandler.Update)  // Update
+		r.Delete("/{id}", userHandler.Delete) // Delete
+	})
 
 	// Healthcheck endpoint
 	s.router.Get("/health", api.HealthCheckHandler)

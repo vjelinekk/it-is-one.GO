@@ -1,12 +1,14 @@
 # GEMINI.md - Context for github.com/vjelinekk/it-is-one.GO
 
 ## Project Overview
-This project is a simple Go-based API server using the `chi` router. It follows a clean package structure separating the entry point (`cmd`), the server setup (`pkg/server`), and the API handlers (`pkg/api`).
+This project is a simple Go-based API server using the `chi` router and `GORM` with a "pure Go" SQLite driver. It follows a clean package structure separating the entry point (`cmd`), the server setup (`pkg/server`), the API handlers (`pkg/api`), and the database models (`pkg/models`).
 
-- **Technologies:** Go 1.26.1, `github.com/go-chi/chi/v5`
+- **Technologies:** Go 1.26.1, `github.com/go-chi/chi/v5`, `gorm.io/gorm`, `github.com/glebarez/sqlite`
 - **Architecture:** 
-  - `cmd/server/main.go`: Entry point that initializes and starts the server on port 8080.
-  - `pkg/server/server.go`: Core server logic, including middleware (Logger, Recoverer, etc.) and routing definitions.
+  - `cmd/server/main.go`: Entry point that initializes the database, runs migrations, and starts the server on port 8080.
+  - `pkg/db/db.go`: Database connection and initialization logic.
+  - `pkg/models/`: Database model definitions (e.g., `User`).
+  - `pkg/server/server.go`: Core server logic, including middleware (Logger, Recoverer, etc.) and routing definitions with DB injection.
   - `pkg/api/health.go`: JSON-based healthcheck endpoint implementation.
 
 ## Building and Running
