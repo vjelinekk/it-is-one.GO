@@ -13,6 +13,11 @@ import (
 
 var errScheduleTimeAlreadyExists = errors.New("schedule time already exists")
 
+// DeletedIDResponse contains the ID of a deleted resource
+type DeletedIDResponse struct {
+	ID uint `json:"id"`
+}
+
 // CreateScheduleRequest is the payload for creating schedules
 type CreateScheduleRequest struct {
 	Time1 string `json:"time1"` // e.g. '08:00:00'

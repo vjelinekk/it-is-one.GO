@@ -41,7 +41,7 @@ const docTemplate = `{
                     }
                 }
             },
-            "post": {
+            "put": {
                 "security": [
                     {
                         "MobileAuth": []
@@ -56,7 +56,7 @@ const docTemplate = `{
                 "tags": [
                     "Caregivers"
                 ],
-                "summary": "Add caregivers",
+                "summary": "Set caregivers (full replace)",
                 "parameters": [
                     {
                         "description": "List of caregivers",
@@ -69,8 +69,8 @@ const docTemplate = `{
                     }
                 ],
                 "responses": {
-                    "201": {
-                        "description": "Created",
+                    "200": {
+                        "description": "OK",
                         "schema": {
                             "type": "array",
                             "items": {
@@ -107,36 +107,6 @@ const docTemplate = `{
                         "schema": {
                             "$ref": "#/definitions/api.VerifyPhoneRequest"
                         }
-                    }
-                ],
-                "responses": {
-                    "200": {
-                        "description": "OK"
-                    }
-                }
-            }
-        },
-        "/api/v1/caregivers/{email}": {
-            "delete": {
-                "security": [
-                    {
-                        "MobileAuth": []
-                    }
-                ],
-                "produces": [
-                    "application/json"
-                ],
-                "tags": [
-                    "Caregivers"
-                ],
-                "summary": "Delete caregiver",
-                "parameters": [
-                    {
-                        "type": "string",
-                        "description": "Caregiver email",
-                        "name": "email",
-                        "in": "path",
-                        "required": true
                     }
                 ],
                 "responses": {

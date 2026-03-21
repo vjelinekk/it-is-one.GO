@@ -105,7 +105,7 @@ paths:
       summary: List caregivers
       tags:
       - Caregivers
-    post:
+    put:
       consumes:
       - application/json
       parameters:
@@ -118,33 +118,15 @@ paths:
       produces:
       - application/json
       responses:
-        "201":
-          description: Created
+        "200":
+          description: OK
           schema:
             items:
               $ref: '#/definitions/api.CaregiverInput'
             type: array
       security:
       - MobileAuth: []
-      summary: Add caregivers
-      tags:
-      - Caregivers
-  /api/v1/caregivers/{email}:
-    delete:
-      parameters:
-      - description: Caregiver email
-        in: path
-        name: email
-        required: true
-        type: string
-      produces:
-      - application/json
-      responses:
-        "200":
-          description: OK
-      security:
-      - MobileAuth: []
-      summary: Delete caregiver
+      summary: Set caregivers (full replace)
       tags:
       - Caregivers
   /api/v1/caregivers/verify-phone:

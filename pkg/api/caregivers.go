@@ -3,9 +3,7 @@ package api
 import (
 	"encoding/json"
 	"net/http"
-	"net/url"
 
-	"github.com/go-chi/chi/v5"
 	"github.com/vjelinekk/it-is-one.GO/pkg/email"
 	"github.com/vjelinekk/it-is-one.GO/pkg/models"
 	"github.com/vjelinekk/it-is-one.GO/pkg/sms"
@@ -17,26 +15,27 @@ type CaregiverInput struct {
 	Phone string `json:"phone"` // E.164 format e.g. +420123456789
 }
 
-// CaregiverRequest is the payload for adding caregivers
+// CaregiverRequest is the payload for setting caregivers
 type CaregiverRequest struct {
 	Caregivers []CaregiverInput `json:"caregivers"`
 }
 
-// DeletedIDResponse contains the ID of a deleted resource
-type DeletedIDResponse struct {
-	ID uint `json:"id"`
+// VerifyPhoneRequest is the payload for verifying a caregiver phone OTP
+type VerifyPhoneRequest struct {
+	Phone string `json:"phone"`
+	OTP   string `json:"otp"`
 }
 
-// AddCaregivers adds one or more caregivers
-// @Summary Add caregivers
+// SetCaregivers replaces all caregivers for the user
+// @Summary Set caregivers (full replace)
 // @Tags Caregivers
 // @Security MobileAuth
 // @Accept json
 // @Produce json
 // @Param body body CaregiverRequest true "List of caregivers"
-// @Success 201 {array} CaregiverInput
-// @Router /api/v1/caregivers [post]
-func (h *MobileHandler) AddCaregiver(w http.ResponseWriter, r *http.Request) {
+// @Success 200 {array} CaregiverInput
+// @Router /api/v1/caregivers [put]
+func (h *MobileHandler) SetCaregivers(w http.ResponseWriter, r *http.Request) {
 	userID := r.Context().Value(UserIDKey).(uint)
 	var req CaregiverRequest
 	if err := json.NewDecoder(r.Body).Decode(&req); err != nil {
@@ -44,29 +43,15 @@ func (h *MobileHandler) AddCaregiver(w http.ResponseWriter, r *http.Request) {
 		return
 	}
 
-	if len(req.Caregivers) == 0 {
-		w.WriteHeader(http.StatusOK)
+	// Delete all existing caregivers for this user
+	if err := h.DB.Where("patient_id = ?", userID).Delete(&models.Caregiver{}).Error; err != nil {
+		http.Error(w, "Failed to clear caregivers", http.StatusInternalServerError)
 		return
 	}
 
-	var created []CaregiverInput
+	var result []CaregiverInput
 	for _, input := range req.Caregivers {
 		if input.Email == "" && input.Phone == "" {
-			continue
-		}
-
-		// Skip duplicates per patient
-		var count int64
-		query := h.DB.Model(&models.Caregiver{}).Where("patient_id = ?", userID)
-		if input.Email != "" && input.Phone != "" {
-			query = query.Where("email = ? OR phone = ?", input.Email, input.Phone)
-		} else if input.Email != "" {
-			query = query.Where("email = ?", input.Email)
-		} else {
-			query = query.Where("phone = ?", input.Phone)
-		}
-		query.Count(&count)
-		if count > 0 {
 			continue
 		}
 
@@ -75,25 +60,18 @@ func (h *MobileHandler) AddCaregiver(w http.ResponseWriter, r *http.Request) {
 			http.Error(w, "Failed to add caregiver", http.StatusInternalServerError)
 			return
 		}
-		created = append(created, CaregiverInput{Email: cg.Email, Phone: cg.Phone})
+		result = append(result, CaregiverInput{Email: cg.Email, Phone: cg.Phone})
 
 		if input.Email != "" {
 			email.VerifyEmail(input.Email)
 		}
-		if cg.Phone != "" {
-			sms.SendSandboxOTP(cg.Phone)
+		if input.Phone != "" {
+			sms.SendSandboxOTP(input.Phone)
 		}
 	}
 
 	w.Header().Set("Content-Type", "application/json")
-	w.WriteHeader(http.StatusCreated)
-	json.NewEncoder(w).Encode(created)
-}
-
-// VerifyPhoneRequest is the payload for verifying a caregiver phone OTP
-type VerifyPhoneRequest struct {
-	Phone string `json:"phone"`
-	OTP   string `json:"otp"`
+	json.NewEncoder(w).Encode(result)
 }
 
 // VerifyPhone verifies a caregiver phone number OTP in SNS sandbox
@@ -140,28 +118,4 @@ func (h *MobileHandler) ListCaregivers(w http.ResponseWriter, r *http.Request) {
 
 	w.Header().Set("Content-Type", "application/json")
 	json.NewEncoder(w).Encode(result)
-}
-
-// DeleteCaregiver deletes a caregiver by email
-// @Summary Delete caregiver
-// @Tags Caregivers
-// @Security MobileAuth
-// @Produce json
-// @Param email path string true "Caregiver email"
-// @Success 200
-// @Router /api/v1/caregivers/{email} [delete]
-func (h *MobileHandler) DeleteCaregiver(w http.ResponseWriter, r *http.Request) {
-	userID := r.Context().Value(UserIDKey).(uint)
-	emailParam, err := url.PathUnescape(chi.URLParam(r, "email"))
-	if err != nil || emailParam == "" {
-		http.Error(w, "Invalid email", http.StatusBadRequest)
-		return
-	}
-
-	if err := h.DB.Where("patient_id = ? AND email = ?", userID, emailParam).Delete(&models.Caregiver{}).Error; err != nil {
-		http.Error(w, "Failed to delete caregiver", http.StatusInternalServerError)
-		return
-	}
-
-	w.WriteHeader(http.StatusOK)
 }

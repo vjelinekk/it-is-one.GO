@@ -67,10 +67,9 @@ func (s *Server) setupRoutes() {
 			mob.Delete("/schedules/{id}", mobHandler.DeleteSchedule)
 
 			// Caregivers
-			mob.Post("/caregivers", mobHandler.AddCaregiver)
+			mob.Put("/caregivers", mobHandler.SetCaregivers)
 			mob.Post("/caregivers/verify-phone", mobHandler.VerifyPhone)
 			mob.Get("/caregivers", mobHandler.ListCaregivers)
-			mob.Delete("/caregivers/{email}", mobHandler.DeleteCaregiver)
 
 			// Intake Logs
 			mob.Post("/intake-logs", api.NewIntakeLogHandler(s.db).LogIntake)
