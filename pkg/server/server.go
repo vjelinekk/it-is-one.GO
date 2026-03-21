@@ -9,8 +9,8 @@ import (
 	httpSwagger "github.com/swaggo/http-swagger"
 	"gorm.io/gorm"
 
+	_ "github.com/vjelinekk/it-is-one.GO/docs"
 	"github.com/vjelinekk/it-is-one.GO/pkg/api"
-	_ "github.com/vjelinekk/it-is-one.GO/pkg/server/docs" // Import generated docs
 )
 
 type Server struct {
@@ -51,26 +51,15 @@ func (s *Server) setupRoutes() {
 			hw.Use(api.HardwareAuthMiddleware)
 			hwHandler := api.NewHardwareHandler(s.db)
 			hw.Post("/device/heartbeat", hwHandler.Heartbeat)
-			hw.Post("/device/intake", hwHandler.LogIntake)
 		})
 
 		// Mobile Endpoints
 		r.Group(func(mob chi.Router) {
 			mob.Use(api.MobileAuthMiddleware)
 			mobHandler := api.NewMobileHandler(s.db)
-			userHandler := api.NewUserHandler(s.db)
 
 			// User & Device Linking
-			// Specific routes like /me MUST come before wildcards like /{id}
-			mob.Get("/users/me", mobHandler.GetMe)
-			mob.Put("/users/me", mobHandler.UpdateMe)
-			mob.Put("/users/me/device", mobHandler.LinkDevice)
-
-			// Standard CRUD
-			mob.Get("/users", userHandler.List)
-			mob.Get("/users/{id}", userHandler.Get)
-			mob.Put("/users/{id}", userHandler.Update)
-			mob.Delete("/users/{id}", userHandler.Delete)
+			mob.Patch("/users", api.NewUserHandler(s.db).Patch)
 
 			// Schedules
 			mob.Post("/schedules", mobHandler.CreateSchedule)
@@ -82,10 +71,10 @@ func (s *Server) setupRoutes() {
 			mob.Get("/caregivers", mobHandler.ListCaregivers)
 			mob.Delete("/caregivers/{id}", mobHandler.DeleteCaregiver)
 
-			// Notifications & Logs
-			mob.Post("/push-tokens", mobHandler.RegisterPushToken)
-			mob.Get("/intake-logs", mobHandler.ListIntakeLogs)
+			// Intake Logs
+			mob.Post("/intake-logs", api.NewIntakeLogHandler(s.db).LogIntake)
 		})
+
 	})
 	// Healthcheck endpoint
 	s.router.Get("/health", api.HealthCheckHandler)

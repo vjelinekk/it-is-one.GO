@@ -17,16 +17,16 @@ type User struct {
 	Timezone string `json:"timezone" gorm:"help:Necessary to know when it is 8 AM for THIS user"`
 
 	// Hardware fields
-	DeviceSerial   string     `gorm:"uniqueIndex" json:"device_serial"`
+	DeviceSerial   *string    `gorm:"uniqueIndex" json:"device_serial"`
 	DeviceBattery  int        `gorm:"default:100" json:"device_battery"`
 	DeviceLastSeen *time.Time `json:"device_last_seen"`
 
 	// Notification thresholds
-	MissedDoseThreshold int `gorm:"default:1" json:"missed_dose_threshold"`
-	CurrentMissedDoses  int `gorm:"default:0" json:"current_missed_doses"`
+	NotifyAfterMinutes          int `gorm:"default:10" json:"notify_after_minutes"`
+	NotifyCaregiversAfterRetries int `gorm:"default:3" json:"notify_caregivers_after_retries"`
+	CurrentMissedDoses          int `gorm:"default:0" json:"current_missed_doses"`
 
 	// Relationships
-	PushTokens []PushToken `json:"push_tokens,omitempty"`
 	Schedules  []Schedule  `json:"schedules,omitempty"`
 	Caregivers []Caregiver `json:"caregivers,omitempty" gorm:"foreignKey:PatientID"`
 }

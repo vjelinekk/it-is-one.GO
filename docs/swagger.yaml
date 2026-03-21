@@ -1,0 +1,273 @@
+basePath: /api/v1
+definitions:
+  api.CaregiverRequest:
+    properties:
+      email:
+        type: string
+    type: object
+  api.CreateScheduleRequest:
+    properties:
+      time1:
+        description: e.g. '08:00:00'
+        type: string
+      time2:
+        description: e.g. '20:00:00'
+        type: string
+    type: object
+  api.CreateUserRequest:
+    properties:
+      email:
+        type: string
+    type: object
+  api.CreateUserResponse:
+    properties:
+      id:
+        type: integer
+    type: object
+  api.DeletedIDResponse:
+    properties:
+      id:
+        type: integer
+    type: object
+  api.HealthResponse:
+    properties:
+      status:
+        type: string
+      timestamp:
+        type: string
+    type: object
+  api.PatchUserRequest:
+    properties:
+      notify_after_minutes:
+        type: integer
+      notify_caregivers_after_retries:
+        type: integer
+    type: object
+  models.Schedule:
+    properties:
+      id:
+        type: integer
+      time1:
+        description: e.g. '08:00:00'
+        type: string
+      time2:
+        description: e.g. '20:00:00'
+        type: string
+      user_id:
+        type: integer
+    type: object
+host: localhost:8080
+info:
+  contact: {}
+  description: API for Smart Pill Doser POC.
+  title: Smart Pill Doser API
+  version: "1.0"
+paths:
+  /caregivers:
+    get:
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: OK
+          schema:
+            items:
+              $ref: '#/definitions/api.CaregiverRequest'
+            type: array
+      security:
+      - MobileAuth: []
+      summary: List caregivers
+      tags:
+      - Caregivers
+    post:
+      consumes:
+      - application/json
+      parameters:
+      - description: Caregiver details
+        in: body
+        name: body
+        required: true
+        schema:
+          $ref: '#/definitions/api.CaregiverRequest'
+      produces:
+      - application/json
+      responses:
+        "201":
+          description: Created
+          schema:
+            $ref: '#/definitions/api.CaregiverRequest'
+      security:
+      - MobileAuth: []
+      summary: Add caregiver
+      tags:
+      - Caregivers
+  /caregivers/{id}:
+    delete:
+      parameters:
+      - description: Caregiver ID
+        in: path
+        name: id
+        required: true
+        type: integer
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: OK
+          schema:
+            $ref: '#/definitions/api.DeletedIDResponse'
+      security:
+      - MobileAuth: []
+      summary: Delete caregiver
+      tags:
+      - Caregivers
+  /device/heartbeat:
+    post:
+      consumes:
+      - application/json
+      parameters:
+      - description: Battery Level
+        in: body
+        name: body
+        required: true
+        schema:
+          type: object
+      responses:
+        "200":
+          description: OK
+          schema:
+            type: string
+      security:
+      - HardwareAuth: []
+      summary: Device heartbeat
+      tags:
+      - Hardware
+  /health:
+    get:
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: OK
+          schema:
+            $ref: '#/definitions/api.HealthResponse'
+      summary: Health check
+      tags:
+      - System
+  /intake-logs:
+    post:
+      responses:
+        "204":
+          description: No Content
+      security:
+      - MobileAuth: []
+      summary: Log medication intake
+      tags:
+      - IntakeLogs
+  /schedules:
+    get:
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: OK
+          schema:
+            items:
+              $ref: '#/definitions/models.Schedule'
+            type: array
+      security:
+      - MobileAuth: []
+      summary: List schedules
+      tags:
+      - Schedules
+    post:
+      consumes:
+      - application/json
+      parameters:
+      - description: Schedule times
+        in: body
+        name: body
+        required: true
+        schema:
+          $ref: '#/definitions/api.CreateScheduleRequest'
+      produces:
+      - application/json
+      responses:
+        "201":
+          description: Created
+          schema:
+            $ref: '#/definitions/models.Schedule'
+      security:
+      - MobileAuth: []
+      summary: Create schedule
+      tags:
+      - Schedules
+  /schedules/{id}:
+    delete:
+      parameters:
+      - description: Schedule ID
+        in: path
+        name: id
+        required: true
+        type: integer
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: OK
+          schema:
+            $ref: '#/definitions/api.DeletedIDResponse'
+      security:
+      - MobileAuth: []
+      summary: Delete schedule
+      tags:
+      - Schedules
+  /users:
+    patch:
+      consumes:
+      - application/json
+      parameters:
+      - description: Notification settings
+        in: body
+        name: body
+        required: true
+        schema:
+          $ref: '#/definitions/api.PatchUserRequest'
+      responses:
+        "204":
+          description: No Content
+      security:
+      - MobileAuth: []
+      summary: Patch user notification settings
+      tags:
+      - Users
+    post:
+      consumes:
+      - application/json
+      parameters:
+      - description: User email
+        in: body
+        name: body
+        required: true
+        schema:
+          $ref: '#/definitions/api.CreateUserRequest'
+      produces:
+      - application/json
+      responses:
+        "201":
+          description: Created
+          schema:
+            $ref: '#/definitions/api.CreateUserResponse'
+      summary: Create user
+      tags:
+      - Users
+securityDefinitions:
+  HardwareAuth:
+    in: header
+    name: X-Device-Serial
+    type: apiKey
+  MobileAuth:
+    in: header
+    name: X-User-ID
+    type: apiKey
+swagger: "2.0"

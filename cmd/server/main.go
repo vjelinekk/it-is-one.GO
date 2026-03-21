@@ -33,7 +33,6 @@ func main() {
 	log.Println("Running database migrations...")
 	if err := database.AutoMigrate(
 		&models.User{},
-		&models.PushToken{},
 		&models.Schedule{},
 		&models.IntakeLog{},
 		&models.Caregiver{},

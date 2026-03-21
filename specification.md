@@ -19,7 +19,7 @@ The system follows a strict hierarchical communication model to ensure data deli
 
 ### 3.1 Identity & Hardware Mapping
 * **User-to-Device Linking:** The API maintains a 1-to-1 relationship between a `User ID` and a physical `Device Serial Number`.
-* **Caretaker Management:** The API stores a list of caretaker contact details (Email/Push Tokens) associated with each patient.
+* **Caretaker Management:** The API stores a list of caretaker contact details (Email) associated with each patient.
 * **POC Authentication:** Requests are identified via custom headers: `X-User-ID` for the mobile app and `X-Device-Serial` for the hardware.
 
 ### 3.2 Schedule & Intake Management

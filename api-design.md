@@ -69,19 +69,15 @@ These endpoints are called by the ESP32 (either via Wi-Fi directly, or proxied t
 **`DELETE /api/v1/caregivers/{id}`**
 - **Description:** Remove a caregiver.
 
-### 2.4 Notifications & Tokens
-**`POST /api/v1/push-tokens`**
-- **Description:** Register a mobile device for push notifications.
-
-### 2.5 Intake Logs (History)
+### 2.4 Intake Logs (History)
 **`GET /api/v1/intake-logs`**
 - **Description:** Retrieve the history of taken/missed medications.
 
 ---
 
 ## 3. Background Workers
-1. **The Watchdog:** Runs every 5 minutes. Checks `users.device_last_seen`. If `now() - device_last_seen > 120 minutes`, it triggers a push notification to the user: *"Your pill doser is offline."*
+1. **The Watchdog:** Runs every 5 minutes. Checks `users.device_last_seen`. If `now() - device_last_seen > 120 minutes`, it triggers an email notification to the user: *"Your pill doser is offline."*
 2. **The Escalator:** Runs every 1 minute. Checks `schedules` against current time and `intake_logs`. 
-    - At $T$ (Scheduled Time): If `current_missed_doses < threshold`, notify User. 
-    - At $T$ (Scheduled Time): If `current_missed_doses >= threshold`, notify User + Caregivers.
+    - At $T$ (Scheduled Time): If `current_missed_doses < threshold`, notify User via email. 
+    - At $T$ (Scheduled Time): If `current_missed_doses >= threshold`, notify User + Caregivers via email.
     - If a dose is missed (T + X hours), it increments `current_missed_doses`.
