@@ -3,9 +3,7 @@ package api
 import (
 	"encoding/json"
 	"net/http"
-	"strconv"
 
-	"github.com/go-chi/chi/v5"
 	"github.com/vjelinekk/it-is-one.GO/pkg/email"
 	"github.com/vjelinekk/it-is-one.GO/pkg/models"
 )
@@ -87,27 +85,33 @@ func (h *MobileHandler) ListCaregivers(w http.ResponseWriter, r *http.Request) {
 }
 
 // DeleteCaregiver deletes a caregiver
-// @Summary Delete caregiver
+// @Summary Delete caregivers
 // @Tags Caregivers
 // @Security MobileAuth
+// @Accept json
 // @Produce json
-// @Param id path int true "Caregiver ID"
-// @Success 200 {object} DeletedIDResponse
-// @Router /api/v1/caregivers/{id} [delete]
+// @Param body body CaregiverRequest true "List of caregiver emails"
+// @Success 200 {object} CaregiverRequest
+// @Router /api/v1/caregivers [delete]
 func (h *MobileHandler) DeleteCaregiver(w http.ResponseWriter, r *http.Request) {
 	userID := r.Context().Value(UserIDKey).(uint)
-	idStr := chi.URLParam(r, "id")
-	id, err := strconv.ParseUint(idStr, 10, 64)
-	if err != nil {
-		http.Error(w, "Invalid ID", http.StatusBadRequest)
+	var req CaregiverRequest
+	if err := json.NewDecoder(r.Body).Decode(&req); err != nil {
+		http.Error(w, "Invalid payload", http.StatusBadRequest)
 		return
 	}
 
-	if err := h.DB.Where("id = ? AND patient_id = ?", id, userID).Delete(&models.Caregiver{}).Error; err != nil {
+	if len(req.Emails) == 0 {
+		w.Header().Set("Content-Type", "application/json")
+		json.NewEncoder(w).Encode(CaregiverRequest{Emails: []string{}})
+		return
+	}
+
+	if err := h.DB.Where("patient_id = ? AND email IN ?", userID, req.Emails).Delete(&models.Caregiver{}).Error; err != nil {
 		http.Error(w, "Failed to delete caregiver", http.StatusInternalServerError)
 		return
 	}
 
 	w.Header().Set("Content-Type", "application/json")
-	json.NewEncoder(w).Encode(DeletedIDResponse{ID: uint(id)})
+	json.NewEncoder(w).Encode(CaregiverRequest{Emails: req.Emails})
 }
