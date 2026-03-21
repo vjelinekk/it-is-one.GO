@@ -126,13 +126,28 @@ func checkSchedules(db *gorm.DB) {
 }
 
 func checkOfflineDevices(db *gorm.DB) {
-	threshold := time.Now().Add(-120 * time.Minute)
+	threshold := time.Now().Add(-60 * time.Minute)
 
 	var offlineUsers []models.User
-	db.Where("device_last_seen < ? AND device_serial IS NOT NULL", threshold).Find(&offlineUsers)
+	db.Preload("Caregivers").
+		Where("device_last_seen < ? AND device_serial IS NOT NULL AND device_offline_notified = false", threshold).
+		Find(&offlineUsers)
 
 	for _, user := range offlineUsers {
-		log.Printf("[WATCHDOG] User %d: device is OFFLINE (Last seen: %v)",
-			user.ID, user.DeviceLastSeen)
+		lastSeen := "unknown"
+		if user.DeviceLastSeen != nil {
+			lastSeen = user.DeviceLastSeen.Format("2006-01-02 15:04:05")
+		}
+		log.Printf("[WATCHDOG] User %d: device OFFLINE since %s", user.ID, lastSeen)
+
+		if len(user.Caregivers) == 0 {
+			log.Printf("[WATCHDOG] User %d: no caregivers to notify", user.ID)
+		} else {
+			for _, cg := range user.Caregivers {
+				email.SendDeviceOfflineAlert(cg.Email, user.Email, lastSeen)
+			}
+		}
+
+		db.Model(&models.User{}).Where("id = ?", user.ID).Update("device_offline_notified", true)
 	}
 }

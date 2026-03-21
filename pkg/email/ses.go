@@ -32,6 +32,39 @@ func Init(from string) {
 	log.Printf("[SES] Initialized with sender: %s", from)
 }
 
+// SendDeviceOfflineAlert sends a device offline notification email via AWS SES.
+func SendDeviceOfflineAlert(to, patientEmail string, lastSeen string) error {
+	subject := "Pill Dispenser Offline Alert"
+	body := fmt.Sprintf(
+		"Hello,\n\nThe pill dispenser for your patient %s has been offline since %s.\n\nPlease check the device.\n",
+		patientEmail, lastSeen,
+	)
+
+	if client == nil || fromEmail == "" {
+		log.Printf("[EMAIL] To: %s — Device for patient %s offline since %s", to, patientEmail, lastSeen)
+		return nil
+	}
+
+	_, err := client.SendEmail(context.Background(), &ses.SendEmailInput{
+		Destination: &types.Destination{
+			ToAddresses: []string{to},
+		},
+		Message: &types.Message{
+			Subject: &types.Content{Data: aws.String(subject), Charset: aws.String("UTF-8")},
+			Body: &types.Body{
+				Text: &types.Content{Data: aws.String(body), Charset: aws.String("UTF-8")},
+			},
+		},
+		Source: aws.String(fromEmail),
+	})
+	if err != nil {
+		log.Printf("[SES] Failed to send device offline alert to %s: %v", to, err)
+		return err
+	}
+	log.Printf("[SES] Device offline alert sent to %s", to)
+	return nil
+}
+
 // VerifyEmail triggers AWS SES to send a verification email to the given address.
 // This is required in sandbox mode before SES can send emails to that address.
 func VerifyEmail(to string) {

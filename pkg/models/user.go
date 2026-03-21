@@ -22,9 +22,10 @@ type User struct {
 	Timezone string `json:"timezone" gorm:"help:Necessary to know when it is 8 AM for THIS user"`
 
 	// Hardware fields
-	DeviceSerial   *string    `gorm:"uniqueIndex" json:"device_serial"`
-	DeviceBattery  int        `gorm:"default:100" json:"device_battery"`
-	DeviceLastSeen *time.Time `json:"device_last_seen"`
+	DeviceSerial           *string    `gorm:"uniqueIndex" json:"device_serial"`
+	DeviceBattery          int        `gorm:"default:100" json:"device_battery"`
+	DeviceLastSeen         *time.Time `json:"device_last_seen"`
+	DeviceOfflineNotified  bool       `gorm:"default:false" json:"device_offline_notified"`
 
 	// Notification thresholds
 	NotifyAfterMinutes           int `gorm:"default:5" json:"notify_after_minutes"`

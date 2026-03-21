@@ -37,8 +37,9 @@ func (h *HardwareHandler) Heartbeat(w http.ResponseWriter, r *http.Request) {
 
 	now := time.Now()
 	updates := map[string]interface{}{
-		"device_battery":   req.BatteryLevel,
-		"device_last_seen": &now,
+		"device_battery":          req.BatteryLevel,
+		"device_last_seen":        &now,
+		"device_offline_notified": false,
 	}
 
 	var res *gorm.DB
