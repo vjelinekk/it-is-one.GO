@@ -135,14 +135,14 @@ func (h *MobileHandler) ListCaregivers(w http.ResponseWriter, r *http.Request) {
 	json.NewEncoder(w).Encode(caregivers)
 }
 
-// DeleteCaregiver deletes a caregiver
+// DeleteCaregiver deletes caregivers by email or phone
 // @Summary Delete caregivers
 // @Tags Caregivers
 // @Security MobileAuth
 // @Accept json
 // @Produce json
-// @Param body body CaregiverRequest true "List of caregiver emails"
-// @Success 200 {object} CaregiverRequest
+// @Param body body CaregiverRequest true "List of caregivers to delete"
+// @Success 200
 // @Router /api/v1/caregivers [delete]
 func (h *MobileHandler) DeleteCaregiver(w http.ResponseWriter, r *http.Request) {
 	userID := r.Context().Value(UserIDKey).(uint)
@@ -152,17 +152,27 @@ func (h *MobileHandler) DeleteCaregiver(w http.ResponseWriter, r *http.Request) 
 		return
 	}
 
-	if len(req.Emails) == 0 {
-		w.Header().Set("Content-Type", "application/json")
-		json.NewEncoder(w).Encode(CaregiverRequest{Emails: []string{}})
+	if len(req.Caregivers) == 0 {
+		w.WriteHeader(http.StatusOK)
 		return
 	}
 
-	if err := h.DB.Where("patient_id = ? AND email IN ?", userID, req.Emails).Delete(&models.Caregiver{}).Error; err != nil {
-		http.Error(w, "Failed to delete caregiver", http.StatusInternalServerError)
-		return
+	for _, input := range req.Caregivers {
+		query := h.DB.Where("patient_id = ?", userID)
+		if input.Email != "" && input.Phone != "" {
+			query = query.Where("email = ? OR phone = ?", input.Email, input.Phone)
+		} else if input.Email != "" {
+			query = query.Where("email = ?", input.Email)
+		} else if input.Phone != "" {
+			query = query.Where("phone = ?", input.Phone)
+		} else {
+			continue
+		}
+		if err := query.Delete(&models.Caregiver{}).Error; err != nil {
+			http.Error(w, "Failed to delete caregiver", http.StatusInternalServerError)
+			return
+		}
 	}
 
-	w.Header().Set("Content-Type", "application/json")
-	json.NewEncoder(w).Encode(CaregiverRequest{Emails: req.Emails})
+	w.WriteHeader(http.StatusOK)
 }
