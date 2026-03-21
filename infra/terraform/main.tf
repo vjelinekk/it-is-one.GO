@@ -24,11 +24,9 @@ variable "aws_region" {
 }
 
 variable "github_repo" {
-  description = "GitHub repo URL to clone on EC2 boot (e.g. https://github.com/user/repo.git)"
-  type        = string
+  default = "https://github.com/vjelinekk/it-is-one.GO.git"
 }
 
 variable "ses_from_email" {
-  description = "Verified SES sender email address"
-  type        = string
+  default = "vojtech.jelinekk@gmail.com"
 }
