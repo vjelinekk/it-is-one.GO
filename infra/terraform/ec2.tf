@@ -52,7 +52,7 @@ resource "aws_instance" "pill_doser" {
     chmod +x /usr/local/bin/docker-compose
 
     git clone ${var.github_repo} /app
-    echo "SES_FROM_EMAIL=${var.ses_from_email}" > /app/.env
+    printf "SES_FROM_EMAIL=${var.ses_from_email}\nAWS_REGION=${var.aws_region}\n" > /app/.env
     touch /app/data.db
     cd /app && docker-compose up -d --build
   EOF
