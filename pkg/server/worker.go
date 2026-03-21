@@ -38,6 +38,8 @@ func checkSchedules(db *gorm.DB) {
 		return
 	}
 
+	log.Printf("[WORKER] checking %d users", len(users))
+
 	for _, user := range users {
 		loc, err := time.LoadLocation(user.Timezone)
 		if err != nil || user.Timezone == "" {
@@ -60,14 +62,22 @@ func checkSchedules(db *gorm.DB) {
 			continue
 		}
 
+		log.Printf("[WORKER] user %d has %d schedules, now=%s", user.ID, len(user.Schedules), now.Format("15:04:05"))
+
 		for _, schedule := range user.Schedules {
 			for _, scheduledTimeStr := range []string{schedule.ScheduledTime} {
 				if scheduledTimeStr == "" {
 					continue
 				}
 
+				log.Printf("[WORKER] user %d schedule time raw: %q", user.ID, scheduledTimeStr)
+
 				parsed, err := time.Parse("15:04:05", scheduledTimeStr)
 				if err != nil {
+					parsed, err = time.Parse("15:04", scheduledTimeStr)
+				}
+				if err != nil {
+					log.Printf("[WORKER] user %d parse error for %q: %v", user.ID, scheduledTimeStr, err)
 					continue
 				}
 
