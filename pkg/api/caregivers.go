@@ -34,7 +34,7 @@ type DeletedIDResponse struct {
 // @Accept json
 // @Produce json
 // @Param body body CaregiverRequest true "List of caregivers"
-// @Success 201 {array} models.Caregiver
+// @Success 201 {array} CaregiverInput
 // @Router /api/v1/caregivers [post]
 func (h *MobileHandler) AddCaregiver(w http.ResponseWriter, r *http.Request) {
 	userID := r.Context().Value(UserIDKey).(uint)
@@ -49,7 +49,7 @@ func (h *MobileHandler) AddCaregiver(w http.ResponseWriter, r *http.Request) {
 		return
 	}
 
-	var created []models.Caregiver
+	var created []CaregiverInput
 	for _, input := range req.Caregivers {
 		if input.Email == "" && input.Phone == "" {
 			continue
@@ -75,7 +75,7 @@ func (h *MobileHandler) AddCaregiver(w http.ResponseWriter, r *http.Request) {
 			http.Error(w, "Failed to add caregiver", http.StatusInternalServerError)
 			return
 		}
-		created = append(created, cg)
+		created = append(created, CaregiverInput{Email: cg.Email, Phone: cg.Phone})
 
 		if input.Email != "" {
 			email.VerifyEmail(input.Email)
@@ -123,7 +123,7 @@ func (h *MobileHandler) VerifyPhone(w http.ResponseWriter, r *http.Request) {
 // @Tags Caregivers
 // @Security MobileAuth
 // @Produce json
-// @Success 200 {array} models.Caregiver
+// @Success 200 {array} CaregiverInput
 // @Router /api/v1/caregivers [get]
 func (h *MobileHandler) ListCaregivers(w http.ResponseWriter, r *http.Request) {
 	userID := r.Context().Value(UserIDKey).(uint)
@@ -133,8 +133,13 @@ func (h *MobileHandler) ListCaregivers(w http.ResponseWriter, r *http.Request) {
 		return
 	}
 
+	result := make([]CaregiverInput, len(caregivers))
+	for i, cg := range caregivers {
+		result[i] = CaregiverInput{Email: cg.Email, Phone: cg.Phone}
+	}
+
 	w.Header().Set("Content-Type", "application/json")
-	json.NewEncoder(w).Encode(caregivers)
+	json.NewEncoder(w).Encode(result)
 }
 
 // DeleteCaregiver deletes a caregiver by email

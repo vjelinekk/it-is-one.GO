@@ -73,23 +73,6 @@ definitions:
       phone:
         type: string
     type: object
-  models.Caregiver:
-    properties:
-      created_at:
-        type: string
-      email:
-        type: string
-      id:
-        type: integer
-      patient_id:
-        description: 'ref: > users.id'
-        type: integer
-      phone:
-        description: E.164 format e.g. +420123456789
-        type: string
-      updated_at:
-        type: string
-    type: object
   models.Schedule:
     properties:
       id:
@@ -107,26 +90,6 @@ info:
   version: "1.0"
 paths:
   /api/v1/caregivers:
-    delete:
-      consumes:
-      - application/json
-      parameters:
-      - description: List of caregivers to delete
-        in: body
-        name: body
-        required: true
-        schema:
-          $ref: '#/definitions/api.CaregiverRequest'
-      produces:
-      - application/json
-      responses:
-        "200":
-          description: OK
-      security:
-      - MobileAuth: []
-      summary: Delete caregivers
-      tags:
-      - Caregivers
     get:
       produces:
       - application/json
@@ -135,7 +98,7 @@ paths:
           description: OK
           schema:
             items:
-              $ref: '#/definitions/models.Caregiver'
+              $ref: '#/definitions/api.CaregiverInput'
             type: array
       security:
       - MobileAuth: []
@@ -159,11 +122,29 @@ paths:
           description: Created
           schema:
             items:
-              $ref: '#/definitions/models.Caregiver'
+              $ref: '#/definitions/api.CaregiverInput'
             type: array
       security:
       - MobileAuth: []
       summary: Add caregivers
+      tags:
+      - Caregivers
+  /api/v1/caregivers/{email}:
+    delete:
+      parameters:
+      - description: Caregiver email
+        in: path
+        name: email
+        required: true
+        type: string
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: OK
+      security:
+      - MobileAuth: []
+      summary: Delete caregiver
       tags:
       - Caregivers
   /api/v1/caregivers/verify-phone:

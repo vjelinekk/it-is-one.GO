@@ -35,7 +35,7 @@ const docTemplate = `{
                         "schema": {
                             "type": "array",
                             "items": {
-                                "$ref": "#/definitions/models.Caregiver"
+                                "$ref": "#/definitions/api.CaregiverInput"
                             }
                         }
                     }
@@ -74,42 +74,9 @@ const docTemplate = `{
                         "schema": {
                             "type": "array",
                             "items": {
-                                "$ref": "#/definitions/models.Caregiver"
+                                "$ref": "#/definitions/api.CaregiverInput"
                             }
                         }
-                    }
-                }
-            },
-            "delete": {
-                "security": [
-                    {
-                        "MobileAuth": []
-                    }
-                ],
-                "consumes": [
-                    "application/json"
-                ],
-                "produces": [
-                    "application/json"
-                ],
-                "tags": [
-                    "Caregivers"
-                ],
-                "summary": "Delete caregivers",
-                "parameters": [
-                    {
-                        "description": "List of caregivers to delete",
-                        "name": "body",
-                        "in": "body",
-                        "required": true,
-                        "schema": {
-                            "$ref": "#/definitions/api.CaregiverRequest"
-                        }
-                    }
-                ],
-                "responses": {
-                    "200": {
-                        "description": "OK"
                     }
                 }
             }
@@ -140,6 +107,36 @@ const docTemplate = `{
                         "schema": {
                             "$ref": "#/definitions/api.VerifyPhoneRequest"
                         }
+                    }
+                ],
+                "responses": {
+                    "200": {
+                        "description": "OK"
+                    }
+                }
+            }
+        },
+        "/api/v1/caregivers/{email}": {
+            "delete": {
+                "security": [
+                    {
+                        "MobileAuth": []
+                    }
+                ],
+                "produces": [
+                    "application/json"
+                ],
+                "tags": [
+                    "Caregivers"
+                ],
+                "summary": "Delete caregiver",
+                "parameters": [
+                    {
+                        "type": "string",
+                        "description": "Caregiver email",
+                        "name": "email",
+                        "in": "path",
+                        "required": true
                     }
                 ],
                 "responses": {
@@ -535,31 +532,6 @@ const docTemplate = `{
                     "type": "string"
                 },
                 "phone": {
-                    "type": "string"
-                }
-            }
-        },
-        "models.Caregiver": {
-            "type": "object",
-            "properties": {
-                "created_at": {
-                    "type": "string"
-                },
-                "email": {
-                    "type": "string"
-                },
-                "id": {
-                    "type": "integer"
-                },
-                "patient_id": {
-                    "description": "ref: \u003e users.id",
-                    "type": "integer"
-                },
-                "phone": {
-                    "description": "E.164 format e.g. +420123456789",
-                    "type": "string"
-                },
-                "updated_at": {
                     "type": "string"
                 }
             }
