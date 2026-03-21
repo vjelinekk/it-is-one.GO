@@ -9,20 +9,20 @@ import (
 	"github.com/vjelinekk/it-is-one.GO/pkg/models"
 )
 
-// CreateScheduleRequest is the payload for creating a schedule
+// CreateScheduleRequest is the payload for creating schedules
 type CreateScheduleRequest struct {
 	Time1 string `json:"time1"` // e.g. '08:00:00'
 	Time2 string `json:"time2"` // e.g. '20:00:00'
 }
 
-// CreateSchedule creates a medication schedule with two times
-// @Summary Create schedule
+// CreateSchedule creates schedule rows for time1 and time2, skipping duplicates
+// @Summary Create schedules
 // @Tags Schedules
 // @Security MobileAuth
 // @Accept json
 // @Produce json
 // @Param body body CreateScheduleRequest true "Schedule times"
-// @Success 201 {object} models.Schedule
+// @Success 201 {array} models.Schedule
 // @Router /api/v1/schedules [post]
 func (h *MobileHandler) CreateSchedule(w http.ResponseWriter, r *http.Request) {
 	userID := r.Context().Value(UserIDKey).(uint)
@@ -32,19 +32,29 @@ func (h *MobileHandler) CreateSchedule(w http.ResponseWriter, r *http.Request) {
 		return
 	}
 
-	schedule := models.Schedule{
-		UserID: userID,
-		Time1:  req.Time1,
-		Time2:  req.Time2,
-	}
-	if err := h.DB.Create(&schedule).Error; err != nil {
-		http.Error(w, "Failed to create schedule", http.StatusInternalServerError)
-		return
+	var created []models.Schedule
+	for _, t := range []string{req.Time1, req.Time2} {
+		if t == "" {
+			continue
+		}
+		var count int64
+		h.DB.Model(&models.Schedule{}).
+			Where("user_id = ? AND scheduled_time = ?", userID, t).
+			Count(&count)
+		if count > 0 {
+			continue
+		}
+		s := models.Schedule{UserID: userID, ScheduledTime: t}
+		if err := h.DB.Create(&s).Error; err != nil {
+			http.Error(w, "Failed to create schedule", http.StatusInternalServerError)
+			return
+		}
+		created = append(created, s)
 	}
 
 	w.Header().Set("Content-Type", "application/json")
 	w.WriteHeader(http.StatusCreated)
-	json.NewEncoder(w).Encode(schedule)
+	json.NewEncoder(w).Encode(created)
 }
 
 // ListSchedules lists all schedules for the user

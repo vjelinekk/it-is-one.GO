@@ -230,7 +230,7 @@ const docTemplate = `{
                 "tags": [
                     "Schedules"
                 ],
-                "summary": "Create schedule",
+                "summary": "Create schedules",
                 "parameters": [
                     {
                         "description": "Schedule times",
@@ -246,7 +246,10 @@ const docTemplate = `{
                     "201": {
                         "description": "Created",
                         "schema": {
-                            "$ref": "#/definitions/models.Schedule"
+                            "type": "array",
+                            "items": {
+                                "$ref": "#/definitions/models.Schedule"
+                            }
                         }
                     }
                 }
@@ -426,12 +429,8 @@ const docTemplate = `{
                 "id": {
                     "type": "integer"
                 },
-                "time1": {
+                "scheduled_time": {
                     "description": "e.g. '08:00:00'",
-                    "type": "string"
-                },
-                "time2": {
-                    "description": "e.g. '20:00:00'",
                     "type": "string"
                 },
                 "user_id": {

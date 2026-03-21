@@ -49,11 +49,8 @@ definitions:
     properties:
       id:
         type: integer
-      time1:
+      scheduled_time:
         description: e.g. '08:00:00'
-        type: string
-      time2:
-        description: e.g. '20:00:00'
         type: string
       user_id:
         type: integer
@@ -200,10 +197,12 @@ paths:
         "201":
           description: Created
           schema:
-            $ref: '#/definitions/models.Schedule'
+            items:
+              $ref: '#/definitions/models.Schedule'
+            type: array
       security:
       - MobileAuth: []
-      summary: Create schedule
+      summary: Create schedules
       tags:
       - Schedules
   /api/v1/schedules/{id}:

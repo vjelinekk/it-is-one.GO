@@ -74,6 +74,12 @@ func (s *Server) setupRoutes() {
 			mob.Post("/intake-logs", api.NewIntakeLogHandler(s.db).LogIntake)
 		})
 
+		// Debug (remove before production)
+		r.Post("/debug/trigger-escalator", func(w http.ResponseWriter, r *http.Request) {
+			checkSchedules(s.db)
+			w.WriteHeader(http.StatusOK)
+		})
+
 	})
 	// Healthcheck endpoint
 	s.router.Get("/health", api.HealthCheckHandler)
