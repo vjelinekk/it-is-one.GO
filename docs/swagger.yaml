@@ -15,15 +15,6 @@ definitions:
           $ref: '#/definitions/api.CaregiverInput'
         type: array
     type: object
-  api.CreateScheduleRequest:
-    properties:
-      time1:
-        description: e.g. '08:00:00'
-        type: string
-      time2:
-        description: e.g. '20:00:00'
-        type: string
-    type: object
   api.CreateUserRequest:
     properties:
       email:
@@ -38,25 +29,11 @@ definitions:
       notify_caregivers_after_retries:
         type: integer
     type: object
-  api.DeletedIDResponse:
-    properties:
-      id:
-        type: integer
-    type: object
   api.HealthResponse:
     properties:
       status:
         type: string
       timestamp:
-        type: string
-    type: object
-  api.PatchScheduleRequest:
-    properties:
-      time1:
-        description: lower schedule ID
-        type: string
-      time2:
-        description: higher schedule ID
         type: string
     type: object
   api.PatchUserRequest:
@@ -66,22 +43,21 @@ definitions:
       notify_caregivers_after_retries:
         type: integer
     type: object
+  api.SetScheduleRequest:
+    properties:
+      time1:
+        description: e.g. '08:00:00'
+        type: string
+      time2:
+        description: e.g. '20:00:00'
+        type: string
+    type: object
   api.VerifyPhoneRequest:
     properties:
       otp:
         type: string
       phone:
         type: string
-    type: object
-  models.Schedule:
-    properties:
-      id:
-        type: integer
-      scheduled_time:
-        description: e.g. '08:00:00'
-        type: string
-      user_id:
-        type: integer
     type: object
 info:
   contact: {}
@@ -202,15 +178,13 @@ paths:
         "200":
           description: OK
           schema:
-            items:
-              $ref: '#/definitions/models.Schedule'
-            type: array
+            $ref: '#/definitions/api.SetScheduleRequest'
       security:
       - MobileAuth: []
       summary: List schedules
       tags:
       - Schedules
-    patch:
+    put:
       consumes:
       - application/json
       parameters:
@@ -219,63 +193,17 @@ paths:
         name: body
         required: true
         schema:
-          $ref: '#/definitions/api.PatchScheduleRequest'
+          $ref: '#/definitions/api.SetScheduleRequest'
       produces:
       - application/json
       responses:
         "200":
           description: OK
           schema:
-            items:
-              $ref: '#/definitions/models.Schedule'
-            type: array
+            $ref: '#/definitions/api.SetScheduleRequest'
       security:
       - MobileAuth: []
-      summary: Patch schedules
-      tags:
-      - Schedules
-    post:
-      consumes:
-      - application/json
-      parameters:
-      - description: Schedule times
-        in: body
-        name: body
-        required: true
-        schema:
-          $ref: '#/definitions/api.CreateScheduleRequest'
-      produces:
-      - application/json
-      responses:
-        "201":
-          description: Created
-          schema:
-            items:
-              $ref: '#/definitions/models.Schedule'
-            type: array
-      security:
-      - MobileAuth: []
-      summary: Create schedules
-      tags:
-      - Schedules
-  /api/v1/schedules/{id}:
-    delete:
-      parameters:
-      - description: Schedule ID
-        in: path
-        name: id
-        required: true
-        type: integer
-      produces:
-      - application/json
-      responses:
-        "200":
-          description: OK
-          schema:
-            $ref: '#/definitions/api.DeletedIDResponse'
-      security:
-      - MobileAuth: []
-      summary: Delete schedule
+      summary: Set schedules (full replace)
       tags:
       - Schedules
   /api/v1/users:

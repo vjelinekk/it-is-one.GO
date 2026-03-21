@@ -61,10 +61,8 @@ func (s *Server) setupRoutes() {
 			mob.Patch("/users", api.NewUserHandler(s.db).Patch)
 
 			// Schedules
-			mob.Post("/schedules", mobHandler.CreateSchedule)
-			mob.Patch("/schedules", mobHandler.PatchSchedule)
+			mob.Put("/schedules", mobHandler.SetSchedules)
 			mob.Get("/schedules", mobHandler.ListSchedules)
-			mob.Delete("/schedules/{id}", mobHandler.DeleteSchedule)
 
 			// Caregivers
 			mob.Put("/caregivers", mobHandler.SetCaregivers)

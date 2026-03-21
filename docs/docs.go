@@ -209,15 +209,12 @@ const docTemplate = `{
                     "200": {
                         "description": "OK",
                         "schema": {
-                            "type": "array",
-                            "items": {
-                                "$ref": "#/definitions/models.Schedule"
-                            }
+                            "$ref": "#/definitions/api.SetScheduleRequest"
                         }
                     }
                 }
             },
-            "post": {
+            "put": {
                 "security": [
                     {
                         "MobileAuth": []
@@ -232,7 +229,7 @@ const docTemplate = `{
                 "tags": [
                     "Schedules"
                 ],
-                "summary": "Create schedules",
+                "summary": "Set schedules (full replace)",
                 "parameters": [
                     {
                         "description": "Schedule times",
@@ -240,46 +237,7 @@ const docTemplate = `{
                         "in": "body",
                         "required": true,
                         "schema": {
-                            "$ref": "#/definitions/api.CreateScheduleRequest"
-                        }
-                    }
-                ],
-                "responses": {
-                    "201": {
-                        "description": "Created",
-                        "schema": {
-                            "type": "array",
-                            "items": {
-                                "$ref": "#/definitions/models.Schedule"
-                            }
-                        }
-                    }
-                }
-            },
-            "patch": {
-                "security": [
-                    {
-                        "MobileAuth": []
-                    }
-                ],
-                "consumes": [
-                    "application/json"
-                ],
-                "produces": [
-                    "application/json"
-                ],
-                "tags": [
-                    "Schedules"
-                ],
-                "summary": "Patch schedules",
-                "parameters": [
-                    {
-                        "description": "Schedule times",
-                        "name": "body",
-                        "in": "body",
-                        "required": true,
-                        "schema": {
-                            "$ref": "#/definitions/api.PatchScheduleRequest"
+                            "$ref": "#/definitions/api.SetScheduleRequest"
                         }
                     }
                 ],
@@ -287,43 +245,7 @@ const docTemplate = `{
                     "200": {
                         "description": "OK",
                         "schema": {
-                            "type": "array",
-                            "items": {
-                                "$ref": "#/definitions/models.Schedule"
-                            }
-                        }
-                    }
-                }
-            }
-        },
-        "/api/v1/schedules/{id}": {
-            "delete": {
-                "security": [
-                    {
-                        "MobileAuth": []
-                    }
-                ],
-                "produces": [
-                    "application/json"
-                ],
-                "tags": [
-                    "Schedules"
-                ],
-                "summary": "Delete schedule",
-                "parameters": [
-                    {
-                        "type": "integer",
-                        "description": "Schedule ID",
-                        "name": "id",
-                        "in": "path",
-                        "required": true
-                    }
-                ],
-                "responses": {
-                    "200": {
-                        "description": "OK",
-                        "schema": {
-                            "$ref": "#/definitions/api.DeletedIDResponse"
+                            "$ref": "#/definitions/api.SetScheduleRequest"
                         }
                     }
                 }
@@ -417,19 +339,6 @@ const docTemplate = `{
                 }
             }
         },
-        "api.CreateScheduleRequest": {
-            "type": "object",
-            "properties": {
-                "time1": {
-                    "description": "e.g. '08:00:00'",
-                    "type": "string"
-                },
-                "time2": {
-                    "description": "e.g. '20:00:00'",
-                    "type": "string"
-                }
-            }
-        },
         "api.CreateUserRequest": {
             "type": "object",
             "properties": {
@@ -452,14 +361,6 @@ const docTemplate = `{
                 }
             }
         },
-        "api.DeletedIDResponse": {
-            "type": "object",
-            "properties": {
-                "id": {
-                    "type": "integer"
-                }
-            }
-        },
         "api.HealthResponse": {
             "type": "object",
             "properties": {
@@ -467,19 +368,6 @@ const docTemplate = `{
                     "type": "string"
                 },
                 "timestamp": {
-                    "type": "string"
-                }
-            }
-        },
-        "api.PatchScheduleRequest": {
-            "type": "object",
-            "properties": {
-                "time1": {
-                    "description": "lower schedule ID",
-                    "type": "string"
-                },
-                "time2": {
-                    "description": "higher schedule ID",
                     "type": "string"
                 }
             }
@@ -495,6 +383,19 @@ const docTemplate = `{
                 }
             }
         },
+        "api.SetScheduleRequest": {
+            "type": "object",
+            "properties": {
+                "time1": {
+                    "description": "e.g. '08:00:00'",
+                    "type": "string"
+                },
+                "time2": {
+                    "description": "e.g. '20:00:00'",
+                    "type": "string"
+                }
+            }
+        },
         "api.VerifyPhoneRequest": {
             "type": "object",
             "properties": {
@@ -503,21 +404,6 @@ const docTemplate = `{
                 },
                 "phone": {
                     "type": "string"
-                }
-            }
-        },
-        "models.Schedule": {
-            "type": "object",
-            "properties": {
-                "id": {
-                    "type": "integer"
-                },
-                "scheduled_time": {
-                    "description": "e.g. '08:00:00'",
-                    "type": "string"
-                },
-                "user_id": {
-                    "type": "integer"
                 }
             }
         }
