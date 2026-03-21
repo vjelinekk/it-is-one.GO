@@ -2,8 +2,10 @@ package main
 
 import (
 	"log"
+	"os"
 
 	"github.com/vjelinekk/it-is-one.GO/pkg/db"
+	"github.com/vjelinekk/it-is-one.GO/pkg/email"
 	"github.com/vjelinekk/it-is-one.GO/pkg/models"
 	"github.com/vjelinekk/it-is-one.GO/pkg/server"
 )
@@ -38,6 +40,8 @@ func main() {
 	); err != nil {
 		log.Fatalf("Failed to run migrations: %v", err)
 	}
+
+	email.Init(os.Getenv("SES_FROM_EMAIL"))
 
 	srv := server.New("0.0.0.0:8080", database)
 

@@ -1,6 +1,6 @@
 # Binaries and executables
 bin/
-server
+/server
 data.db
 *.exe
 *.exe~

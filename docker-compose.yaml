@@ -1,0 +1,10 @@
+services:
+  api:
+    build: .
+    ports:
+      - "8080:8080"
+    volumes:
+      - ./data.db:/root/data.db
+    env_file:
+      - .env
+    restart: unless-stopped
