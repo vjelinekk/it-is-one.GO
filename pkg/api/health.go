@@ -13,6 +13,11 @@ type HealthResponse struct {
 }
 
 // HealthCheckHandler handles health check requests
+// @Summary Health check
+// @Tags System
+// @Produce json
+// @Success 200 {object} HealthResponse
+// @Router /health [get]
 func HealthCheckHandler(w http.ResponseWriter, r *http.Request) {
 	response := HealthResponse{
 		Status:    "OK",

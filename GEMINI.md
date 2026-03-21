@@ -24,6 +24,9 @@ The following commands can be used for development:
   - `bash docker-manage.sh status`: Check if the container is running.
 - **Docker Compose:** Alternatively, use `docker compose up -d` or `docker compose down`.
 
+## API Documentation
+- **Swagger UI:** Once the server is running, visit [http://localhost:8080/swagger/index.html](http://localhost:8080/swagger/index.html) to view the interactive API documentation and test endpoints.
+
 ## Development Conventions
 - **Routing:** Uses `go-chi` for routing and middleware.
 - **Project Structure:**

@@ -6,13 +6,27 @@ import (
 	"gorm.io/gorm"
 )
 
-// User represents a user record in the database
 type User struct {
 	ID        uint           `gorm:"primaryKey" json:"id"`
 	CreatedAt time.Time      `json:"created_at"`
 	UpdatedAt time.Time      `json:"updated_at"`
 	DeletedAt gorm.DeletedAt `gorm:"index" json:"-"`
 
-	Email     string         `gorm:"uniqueIndex;not null" json:"email"`
-	Name      string         `json:"name"`
+	FullName string `json:"full_name"`
+	Email    string `gorm:"uniqueIndex;not null" json:"email"`
+	Timezone string `json:"timezone" gorm:"help:Necessary to know when it is 8 AM for THIS user"`
+
+	// Hardware fields
+	DeviceSerial   string     `gorm:"uniqueIndex" json:"device_serial"`
+	DeviceBattery  int        `gorm:"default:100" json:"device_battery"`
+	DeviceLastSeen *time.Time `json:"device_last_seen"`
+
+	// Notification thresholds
+	MissedDoseThreshold int `gorm:"default:1" json:"missed_dose_threshold"`
+	CurrentMissedDoses  int `gorm:"default:0" json:"current_missed_doses"`
+
+	// Relationships
+	PushTokens []PushToken `json:"push_tokens,omitempty"`
+	Schedules  []Schedule  `json:"schedules,omitempty"`
+	Caregivers []Caregiver `json:"caregivers,omitempty" gorm:"foreignKey:PatientID"`
 }
