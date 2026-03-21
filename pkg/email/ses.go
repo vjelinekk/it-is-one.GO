@@ -32,6 +32,23 @@ func Init(from string) {
 	log.Printf("[SES] Initialized with sender: %s", from)
 }
 
+// VerifyEmail triggers AWS SES to send a verification email to the given address.
+// This is required in sandbox mode before SES can send emails to that address.
+func VerifyEmail(to string) {
+	if client == nil {
+		log.Printf("[SES] Skipping verification for %s (SES not configured)", to)
+		return
+	}
+	_, err := client.VerifyEmailIdentity(context.Background(), &ses.VerifyEmailIdentityInput{
+		EmailAddress: aws.String(to),
+	})
+	if err != nil {
+		log.Printf("[SES] Failed to send verification to %s: %v", to, err)
+		return
+	}
+	log.Printf("[SES] Verification email sent to %s", to)
+}
+
 // SendMissedDoseAlert sends a missed dose notification email via AWS SES.
 // Falls back to log.Printf if SES is not configured.
 func SendMissedDoseAlert(to, patientEmail, scheduledTime string) error {

@@ -6,6 +6,7 @@ import (
 	"strconv"
 
 	"github.com/go-chi/chi/v5"
+	"github.com/vjelinekk/it-is-one.GO/pkg/email"
 	"github.com/vjelinekk/it-is-one.GO/pkg/models"
 )
 
@@ -53,6 +54,7 @@ func (h *MobileHandler) AddCaregiver(w http.ResponseWriter, r *http.Request) {
 	result := make([]string, len(caregivers))
 	for i, c := range caregivers {
 		result[i] = c.Email
+		email.VerifyEmail(c.Email)
 	}
 
 	w.Header().Set("Content-Type", "application/json")
