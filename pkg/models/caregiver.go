@@ -9,4 +9,5 @@ type Caregiver struct {
 
 	PatientID uint   `json:"patient_id"` // ref: > users.id
 	Email     string `json:"email"`
+	Phone     string `json:"phone"` // E.164 format e.g. +420123456789
 }

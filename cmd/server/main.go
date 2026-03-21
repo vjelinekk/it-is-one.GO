@@ -8,6 +8,7 @@ import (
 	"github.com/vjelinekk/it-is-one.GO/pkg/email"
 	"github.com/vjelinekk/it-is-one.GO/pkg/models"
 	"github.com/vjelinekk/it-is-one.GO/pkg/server"
+	"github.com/vjelinekk/it-is-one.GO/pkg/sms"
 )
 
 // @title Smart Pill Doser API
@@ -42,6 +43,7 @@ func main() {
 	}
 
 	email.Init(os.Getenv("SES_FROM_EMAIL"))
+	sms.Init()
 
 	srv := server.New("0.0.0.0:8080", database)
 

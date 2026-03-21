@@ -5,8 +5,11 @@ import (
 	"sort"
 	"time"
 
+	"fmt"
+
 	"github.com/vjelinekk/it-is-one.GO/pkg/email"
 	"github.com/vjelinekk/it-is-one.GO/pkg/models"
+	"github.com/vjelinekk/it-is-one.GO/pkg/sms"
 	"gorm.io/gorm"
 )
 
@@ -114,7 +117,12 @@ func checkSchedules(db *gorm.DB) {
 						user.ID, doseSlot, scheduledTimeStr)
 				} else {
 					for _, cg := range user.Caregivers {
-						email.SendMissedDoseAlert(cg.Email, user.Email, scheduledTimeStr)
+						if cg.Email != "" {
+							email.SendMissedDoseAlert(cg.Email, user.Email, scheduledTimeStr)
+						}
+						if cg.Phone != "" {
+							sms.Send(cg.Phone, fmt.Sprintf("Patient %s missed dose scheduled at %s", user.Email, scheduledTimeStr))
+						}
 					}
 				}
 			} else if updatedUser.CurrentMissedDoses < threshold {
@@ -144,7 +152,12 @@ func checkOfflineDevices(db *gorm.DB) {
 			log.Printf("[WATCHDOG] User %d: no caregivers to notify", user.ID)
 		} else {
 			for _, cg := range user.Caregivers {
-				email.SendDeviceOfflineAlert(cg.Email, user.Email, lastSeen)
+				if cg.Email != "" {
+					email.SendDeviceOfflineAlert(cg.Email, user.Email, lastSeen)
+				}
+				if cg.Phone != "" {
+					sms.Send(cg.Phone, fmt.Sprintf("Pill dispenser for patient %s is offline since %s", user.Email, lastSeen))
+				}
 			}
 		}
 

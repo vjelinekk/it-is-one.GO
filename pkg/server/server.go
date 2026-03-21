@@ -68,6 +68,7 @@ func (s *Server) setupRoutes() {
 
 			// Caregivers
 			mob.Post("/caregivers", mobHandler.AddCaregiver)
+			mob.Post("/caregivers/verify-phone", mobHandler.VerifyPhone)
 			mob.Get("/caregivers", mobHandler.ListCaregivers)
 			mob.Delete("/caregivers", mobHandler.DeleteCaregiver)
 
