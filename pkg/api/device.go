@@ -21,13 +21,12 @@ func NewHardwareHandler(db *gorm.DB) *HardwareHandler {
 // @Summary Device heartbeat
 // @Tags Hardware
 // @Security HardwareAuth
+// @Security MobileAuth
 // @Accept json
 // @Param body body object true "Battery Level"
 // @Success 200 {string} string "OK"
 // @Router /api/v1/device/heartbeat [post]
 func (h *HardwareHandler) Heartbeat(w http.ResponseWriter, r *http.Request) {
-	serial := r.Context().Value(DeviceSerialKey).(string)
-
 	var req struct {
 		BatteryLevel int `json:"battery_level"`
 	}
@@ -37,11 +36,18 @@ func (h *HardwareHandler) Heartbeat(w http.ResponseWriter, r *http.Request) {
 	}
 
 	now := time.Now()
-	// Update battery level and last seen for the user owning this device
-	res := h.DB.Model(&models.User{}).Where("device_serial = ?", serial).Updates(map[string]interface{}{
+	updates := map[string]interface{}{
 		"device_battery":   req.BatteryLevel,
 		"device_last_seen": &now,
-	})
+	}
+
+	var res *gorm.DB
+	if serial, ok := r.Context().Value(DeviceSerialKey).(string); ok && serial != "" {
+		res = h.DB.Model(&models.User{}).Where("device_serial = ?", serial).Updates(updates)
+	} else {
+		userID := r.Context().Value(UserIDKey).(uint)
+		res = h.DB.Model(&models.User{}).Where("id = ?", userID).Updates(updates)
+	}
 
 	if res.Error != nil {
 		http.Error(w, "Database error", http.StatusInternalServerError)

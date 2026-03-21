@@ -6,8 +6,7 @@
         "contact": {},
         "version": "1.0"
     },
-    "host": "localhost:8080",
-    "basePath": "/api/v1",
+    "basePath": "/",
     "paths": {
         "/api/v1/caregivers": {
             "get": {
@@ -50,10 +49,10 @@
                 "tags": [
                     "Caregivers"
                 ],
-                "summary": "Add caregiver",
+                "summary": "Add caregivers",
                 "parameters": [
                     {
-                        "description": "Caregiver details",
+                        "description": "List of caregiver emails",
                         "name": "body",
                         "in": "body",
                         "required": true,
@@ -66,7 +65,10 @@
                     "201": {
                         "description": "Created",
                         "schema": {
-                            "$ref": "#/definitions/api.CaregiverRequest"
+                            "type": "array",
+                            "items": {
+                                "$ref": "#/definitions/api.CaregiverRequest"
+                            }
                         }
                     }
                 }
@@ -110,6 +112,9 @@
                 "security": [
                     {
                         "HardwareAuth": []
+                    },
+                    {
+                        "MobileAuth": []
                     }
                 ],
                 "consumes": [
@@ -341,8 +346,11 @@
         "api.CaregiverRequest": {
             "type": "object",
             "properties": {
-                "email": {
-                    "type": "string"
+                "emails": {
+                    "type": "array",
+                    "items": {
+                        "type": "string"
+                    }
                 }
             }
         },

@@ -6,6 +6,7 @@ import (
 
 	"github.com/go-chi/chi/v5"
 	"github.com/go-chi/chi/v5/middleware"
+	"github.com/go-chi/cors"
 	httpSwagger "github.com/swaggo/http-swagger"
 	"gorm.io/gorm"
 
@@ -35,22 +36,20 @@ func (s *Server) setupRoutes() {
 	s.router.Use(middleware.RealIP)
 	s.router.Use(middleware.Logger)
 	s.router.Use(middleware.Recoverer)
+	s.router.Use(cors.AllowAll().Handler)
 
 	// Set a timeout value on the request context
 	s.router.Use(middleware.Timeout(60 * time.Second))
 
 	// API v1 Routes
 	s.router.Route("/api/v1", func(r chi.Router) {
-
 		// Public Routes (No Auth needed)
 		r.Post("/users", api.NewUserHandler(s.db).Create)
 
-		// Hardware Endpoints
-
-		r.Group(func(hw chi.Router) {
-			hw.Use(api.HardwareAuthMiddleware)
-			hwHandler := api.NewHardwareHandler(s.db)
-			hw.Post("/device/heartbeat", hwHandler.Heartbeat)
+		// Device Endpoints (accepts X-Device-Serial or X-User-ID)
+		r.Group(func(dev chi.Router) {
+			dev.Use(api.HeartbeatAuthMiddleware)
+			dev.Post("/device/heartbeat", api.NewHardwareHandler(s.db).Heartbeat)
 		})
 
 		// Mobile Endpoints

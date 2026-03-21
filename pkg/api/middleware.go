@@ -46,3 +46,29 @@ func HardwareAuthMiddleware(next http.Handler) http.Handler {
 		next.ServeHTTP(w, r.WithContext(ctx))
 	})
 }
+
+// HeartbeatAuthMiddleware accepts either X-Device-Serial or X-User-ID
+func HeartbeatAuthMiddleware(next http.Handler) http.Handler {
+	return http.HandlerFunc(func(w http.ResponseWriter, r *http.Request) {
+		if serial := r.Header.Get("X-Device-Serial"); serial != "" {
+			ctx := context.WithValue(r.Context(), DeviceSerialKey, serial)
+			next.ServeHTTP(w, r.WithContext(ctx))
+			return
+		}
+
+		userIDStr := r.Header.Get("X-User-ID")
+		if userIDStr == "" {
+			http.Error(w, "Missing X-Device-Serial or X-User-ID header", http.StatusUnauthorized)
+			return
+		}
+
+		userID, err := strconv.ParseUint(userIDStr, 10, 32)
+		if err != nil {
+			http.Error(w, "Invalid X-User-ID format", http.StatusBadRequest)
+			return
+		}
+
+		ctx := context.WithValue(r.Context(), UserIDKey, uint(userID))
+		next.ServeHTTP(w, r.WithContext(ctx))
+	})
+}

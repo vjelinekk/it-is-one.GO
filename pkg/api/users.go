@@ -43,7 +43,14 @@ func (h *UserHandler) Create(w http.ResponseWriter, r *http.Request) {
 		return
 	}
 
-	user := models.User{Email: req.Email}
+	var user models.User
+	if err := h.DB.Where("email = ?", req.Email).First(&user).Error; err == nil {
+		w.Header().Set("Content-Type", "application/json")
+		json.NewEncoder(w).Encode(CreateUserResponse{ID: user.ID})
+		return
+	}
+
+	user = models.User{Email: req.Email, Timezone: "Europe/Prague"}
 	if err := h.DB.Create(&user).Error; err != nil {
 		http.Error(w, err.Error(), http.StatusInternalServerError)
 		return

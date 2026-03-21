@@ -9,9 +9,9 @@ import (
 	"github.com/vjelinekk/it-is-one.GO/pkg/models"
 )
 
-// CaregiverRequest is the payload for adding a caregiver
+// CaregiverRequest is the payload for adding caregivers
 type CaregiverRequest struct {
-	Email string `json:"email"`
+	Emails []string `json:"emails"`
 }
 
 // DeletedIDResponse contains the ID of a deleted resource
@@ -19,14 +19,14 @@ type DeletedIDResponse struct {
 	ID uint `json:"id"`
 }
 
-// AddCaregiver adds a caregiver
-// @Summary Add caregiver
+// AddCaregivers adds one or more caregivers
+// @Summary Add caregivers
 // @Tags Caregivers
 // @Security MobileAuth
 // @Accept json
 // @Produce json
-// @Param body body CaregiverRequest true "Caregiver details"
-// @Success 201 {object} CaregiverRequest
+// @Param body body CaregiverRequest true "List of caregiver emails"
+// @Success 201 {array} CaregiverRequest
 // @Router /api/v1/caregivers [post]
 func (h *MobileHandler) AddCaregiver(w http.ResponseWriter, r *http.Request) {
 	userID := r.Context().Value(UserIDKey).(uint)
@@ -36,18 +36,28 @@ func (h *MobileHandler) AddCaregiver(w http.ResponseWriter, r *http.Request) {
 		return
 	}
 
-	caregiver := models.Caregiver{
-		PatientID: userID,
-		Email:     req.Email,
-	}
-	if err := h.DB.Create(&caregiver).Error; err != nil {
-		http.Error(w, "Failed to add caregiver", http.StatusInternalServerError)
+	if len(req.Emails) == 0 {
+		w.WriteHeader(http.StatusOK)
 		return
+	}
+
+	caregivers := make([]models.Caregiver, len(req.Emails))
+	for i, email := range req.Emails {
+		caregivers[i] = models.Caregiver{PatientID: userID, Email: email}
+	}
+	if err := h.DB.Create(&caregivers).Error; err != nil {
+		http.Error(w, "Failed to add caregivers", http.StatusInternalServerError)
+		return
+	}
+
+	result := make([]string, len(caregivers))
+	for i, c := range caregivers {
+		result[i] = c.Email
 	}
 
 	w.Header().Set("Content-Type", "application/json")
 	w.WriteHeader(http.StatusCreated)
-	json.NewEncoder(w).Encode(CaregiverRequest{Email: caregiver.Email})
+	json.NewEncoder(w).Encode(CaregiverRequest{Emails: result})
 }
 
 // ListCaregivers lists all caregivers
@@ -65,9 +75,9 @@ func (h *MobileHandler) ListCaregivers(w http.ResponseWriter, r *http.Request) {
 		return
 	}
 
-	result := make([]CaregiverRequest, len(caregivers))
+	result := make([]string, len(caregivers))
 	for i, c := range caregivers {
-		result[i] = CaregiverRequest{Email: c.Email}
+		result[i] = c.Email
 	}
 
 	w.Header().Set("Content-Type", "application/json")

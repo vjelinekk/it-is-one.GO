@@ -11,8 +11,7 @@ import (
 // @title Smart Pill Doser API
 // @version 1.0
 // @description API for Smart Pill Doser POC.
-// @host localhost:8080
-// @BasePath /api/v1
+// @BasePath /
 
 // @securityDefinitions.apikey MobileAuth
 // @in header

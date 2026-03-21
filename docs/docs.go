@@ -56,10 +56,10 @@ const docTemplate = `{
                 "tags": [
                     "Caregivers"
                 ],
-                "summary": "Add caregiver",
+                "summary": "Add caregivers",
                 "parameters": [
                     {
-                        "description": "Caregiver details",
+                        "description": "List of caregiver emails",
                         "name": "body",
                         "in": "body",
                         "required": true,
@@ -72,7 +72,10 @@ const docTemplate = `{
                     "201": {
                         "description": "Created",
                         "schema": {
-                            "$ref": "#/definitions/api.CaregiverRequest"
+                            "type": "array",
+                            "items": {
+                                "$ref": "#/definitions/api.CaregiverRequest"
+                            }
                         }
                     }
                 }
@@ -116,6 +119,9 @@ const docTemplate = `{
                 "security": [
                     {
                         "HardwareAuth": []
+                    },
+                    {
+                        "MobileAuth": []
                     }
                 ],
                 "consumes": [
@@ -347,8 +353,11 @@ const docTemplate = `{
         "api.CaregiverRequest": {
             "type": "object",
             "properties": {
-                "email": {
-                    "type": "string"
+                "emails": {
+                    "type": "array",
+                    "items": {
+                        "type": "string"
+                    }
                 }
             }
         },
@@ -448,8 +457,8 @@ const docTemplate = `{
 // SwaggerInfo holds exported Swagger Info so clients can modify it
 var SwaggerInfo = &swag.Spec{
 	Version:          "1.0",
-	Host:             "localhost:8080",
-	BasePath:         "/api/v1",
+	Host:             "",
+	BasePath:         "/",
 	Schemes:          []string{},
 	Title:            "Smart Pill Doser API",
 	Description:      "API for Smart Pill Doser POC.",

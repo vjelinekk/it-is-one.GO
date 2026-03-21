@@ -22,9 +22,9 @@ type User struct {
 	DeviceLastSeen *time.Time `json:"device_last_seen"`
 
 	// Notification thresholds
-	NotifyAfterMinutes          int `gorm:"default:10" json:"notify_after_minutes"`
+	NotifyAfterMinutes           int `gorm:"default:5" json:"notify_after_minutes"`
 	NotifyCaregiversAfterRetries int `gorm:"default:3" json:"notify_caregivers_after_retries"`
-	CurrentMissedDoses          int `gorm:"default:0" json:"current_missed_doses"`
+	CurrentMissedDoses           int `gorm:"default:0" json:"current_missed_doses"`
 
 	// Relationships
 	Schedules  []Schedule  `json:"schedules,omitempty"`
