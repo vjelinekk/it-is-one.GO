@@ -2,6 +2,7 @@ package server
 
 import (
 	"log"
+	"sort"
 	"time"
 
 	"github.com/vjelinekk/it-is-one.GO/pkg/email"
@@ -38,90 +39,87 @@ func checkSchedules(db *gorm.DB) {
 		return
 	}
 
-	log.Printf("[WORKER] checking %d users", len(users))
-
 	for _, user := range users {
 		loc, err := time.LoadLocation(user.Timezone)
 		if err != nil || user.Timezone == "" {
 			loc = time.UTC
 		}
 		now := time.Now().In(loc)
-		startOfDay := time.Date(now.Year(), now.Month(), now.Day(), 0, 0, 0, 0, loc)
+		today := now.Format("2006-01-02")
 
-		// Check if dose was taken today
-		var takenCount int64
-		db.Model(&models.IntakeLog{}).
-			Where("user_id = ? AND taken_at >= ?", user.ID, startOfDay).
-			Count(&takenCount)
+		// Sort schedules by time so index 0 = dose 1, index 1 = dose 2
+		sort.Slice(user.Schedules, func(i, j int) bool {
+			return user.Schedules[i].ScheduledTime < user.Schedules[j].ScheduledTime
+		})
 
-		if takenCount > 0 {
-			// Dose taken today — reset missed doses if needed
-			if user.CurrentMissedDoses > 0 {
-				db.Model(&models.User{}).Where("id = ?", user.ID).Update("current_missed_doses", 0)
+		for i, schedule := range user.Schedules {
+			doseSlot := i + 1
+			scheduledTimeStr := schedule.ScheduledTime
+			if scheduledTimeStr == "" {
+				continue
 			}
-			continue
-		}
 
-		log.Printf("[WORKER] user %d has %d schedules, now=%s", user.ID, len(user.Schedules), now.Format("15:04:05"))
-
-		for _, schedule := range user.Schedules {
-			for _, scheduledTimeStr := range []string{schedule.ScheduledTime} {
-				if scheduledTimeStr == "" {
-					continue
+			// Check if this specific dose was already taken today
+			var takenCount int64
+			db.Model(&models.IntakeLog{}).
+				Where("user_id = ? AND dose_slot = ? AND date = ?", user.ID, doseSlot, today).
+				Count(&takenCount)
+			if takenCount > 0 {
+				if user.CurrentMissedDoses > 0 {
+					db.Model(&models.User{}).Where("id = ?", user.ID).Update("current_missed_doses", 0)
 				}
+				continue
+			}
 
-				log.Printf("[WORKER] user %d schedule time raw: %q", user.ID, scheduledTimeStr)
+			parsed, err := time.Parse("15:04:05", scheduledTimeStr)
+			if err != nil {
+				parsed, err = time.Parse("15:04", scheduledTimeStr)
+			}
+			if err != nil {
+				continue
+			}
 
-				parsed, err := time.Parse("15:04:05", scheduledTimeStr)
-				if err != nil {
-					parsed, err = time.Parse("15:04", scheduledTimeStr)
-				}
-				if err != nil {
-					log.Printf("[WORKER] user %d parse error for %q: %v", user.ID, scheduledTimeStr, err)
-					continue
-				}
+			scheduledTime := time.Date(now.Year(), now.Month(), now.Day(),
+				parsed.Hour(), parsed.Minute(), parsed.Second(), 0, loc)
 
-				scheduledTime := time.Date(now.Year(), now.Month(), now.Day(),
-					parsed.Hour(), parsed.Minute(), parsed.Second(), 0, loc)
+			minutesSince := int(now.Sub(scheduledTime).Minutes())
 
-				minutesSince := int(now.Sub(scheduledTime).Minutes())
+			// Skip if not due yet or too old (> 2 hours)
+			if minutesSince < 0 || minutesSince > 120 {
+				continue
+			}
 
-				// Skip if not due yet or too old (> 2 hours)
-				if minutesSince < 0 || minutesSince > 120 {
-					continue
-				}
+			// Only trigger at each NotifyAfterMinutes interval
+			notifyInterval := user.NotifyAfterMinutes
+			if notifyInterval <= 0 {
+				notifyInterval = models.DefaultNotifyAfterMinutes
+			}
+			if minutesSince%notifyInterval != 0 {
+				continue
+			}
 
-				// Only trigger at each NotifyAfterMinutes interval
-				notifyInterval := user.NotifyAfterMinutes
-				if notifyInterval <= 0 {
-					notifyInterval = models.DefaultNotifyAfterMinutes
-				}
-				if minutesSince%notifyInterval != 0 {
-					continue
-				}
+			// Increment missed doses
+			db.Model(&models.User{}).Where("id = ?", user.ID).
+				Update("current_missed_doses", gorm.Expr("current_missed_doses + 1"))
 
-				// Increment missed doses
-				db.Model(&models.User{}).Where("id = ?", user.ID).
-					Update("current_missed_doses", gorm.Expr("current_missed_doses + 1"))
+			// Re-fetch updated count
+			var updatedUser models.User
+			db.Select("current_missed_doses, notify_caregivers_after_retries").
+				First(&updatedUser, user.ID)
 
-				// Re-fetch updated count
-				var updatedUser models.User
-				db.Select("current_missed_doses, notify_caregivers_after_retries").
-					First(&updatedUser, user.ID)
-
-				if updatedUser.CurrentMissedDoses >= updatedUser.NotifyCaregiversAfterRetries {
-					if len(user.Caregivers) == 0 {
-						log.Printf("[EMAIL] User %d: threshold met at %s but no caregivers registered",
-							user.ID, scheduledTimeStr)
-					} else {
-						for _, cg := range user.Caregivers {
-							email.SendMissedDoseAlert(cg.Email, user.Email, scheduledTimeStr)
-						}
-					}
+			threshold := updatedUser.NotifyCaregiversAfterRetries
+			if updatedUser.CurrentMissedDoses >= threshold && updatedUser.CurrentMissedDoses <= threshold+1 {
+				if len(user.Caregivers) == 0 {
+					log.Printf("[EMAIL] User %d: dose %d threshold met at %s but no caregivers registered",
+						user.ID, doseSlot, scheduledTimeStr)
 				} else {
-					log.Printf("[NUDGE] User %d: dose missed at %s, retry %d/%d",
-						user.ID, scheduledTimeStr, updatedUser.CurrentMissedDoses, updatedUser.NotifyCaregiversAfterRetries)
+					for _, cg := range user.Caregivers {
+						email.SendMissedDoseAlert(cg.Email, user.Email, scheduledTimeStr)
+					}
 				}
+			} else if updatedUser.CurrentMissedDoses < threshold {
+				log.Printf("[NUDGE] User %d: dose %d missed at %s, retry %d/%d",
+					user.ID, doseSlot, scheduledTimeStr, updatedUser.CurrentMissedDoses, threshold)
 			}
 		}
 	}
