@@ -79,14 +79,15 @@ const docTemplate = `{
                         }
                     }
                 }
-            }
-        },
-        "/api/v1/caregivers/{id}": {
+            },
             "delete": {
                 "security": [
                     {
                         "MobileAuth": []
                     }
+                ],
+                "consumes": [
+                    "application/json"
                 ],
                 "produces": [
                     "application/json"
@@ -94,21 +95,23 @@ const docTemplate = `{
                 "tags": [
                     "Caregivers"
                 ],
-                "summary": "Delete caregiver",
+                "summary": "Delete caregivers",
                 "parameters": [
                     {
-                        "type": "integer",
-                        "description": "Caregiver ID",
-                        "name": "id",
-                        "in": "path",
-                        "required": true
+                        "description": "List of caregiver emails",
+                        "name": "body",
+                        "in": "body",
+                        "required": true,
+                        "schema": {
+                            "$ref": "#/definitions/api.CaregiverRequest"
+                        }
                     }
                 ],
                 "responses": {
                     "200": {
                         "description": "OK",
                         "schema": {
-                            "$ref": "#/definitions/api.DeletedIDResponse"
+                            "$ref": "#/definitions/api.CaregiverRequest"
                         }
                     }
                 }
@@ -245,6 +248,45 @@ const docTemplate = `{
                 "responses": {
                     "201": {
                         "description": "Created",
+                        "schema": {
+                            "type": "array",
+                            "items": {
+                                "$ref": "#/definitions/models.Schedule"
+                            }
+                        }
+                    }
+                }
+            },
+            "patch": {
+                "security": [
+                    {
+                        "MobileAuth": []
+                    }
+                ],
+                "consumes": [
+                    "application/json"
+                ],
+                "produces": [
+                    "application/json"
+                ],
+                "tags": [
+                    "Schedules"
+                ],
+                "summary": "Patch schedules",
+                "parameters": [
+                    {
+                        "description": "Schedule times",
+                        "name": "body",
+                        "in": "body",
+                        "required": true,
+                        "schema": {
+                            "$ref": "#/definitions/api.PatchScheduleRequest"
+                        }
+                    }
+                ],
+                "responses": {
+                    "200": {
+                        "description": "OK",
                         "schema": {
                             "type": "array",
                             "items": {
@@ -414,6 +456,19 @@ const docTemplate = `{
                     "type": "string"
                 },
                 "timestamp": {
+                    "type": "string"
+                }
+            }
+        },
+        "api.PatchScheduleRequest": {
+            "type": "object",
+            "properties": {
+                "time1": {
+                    "description": "lower schedule ID",
+                    "type": "string"
+                },
+                "time2": {
+                    "description": "higher schedule ID",
                     "type": "string"
                 }
             }
