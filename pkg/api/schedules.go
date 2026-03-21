@@ -23,7 +23,7 @@ type CreateScheduleRequest struct {
 // @Produce json
 // @Param body body CreateScheduleRequest true "Schedule times"
 // @Success 201 {object} models.Schedule
-// @Router /schedules [post]
+// @Router /api/v1/schedules [post]
 func (h *MobileHandler) CreateSchedule(w http.ResponseWriter, r *http.Request) {
 	userID := r.Context().Value(UserIDKey).(uint)
 	var req CreateScheduleRequest
@@ -53,7 +53,7 @@ func (h *MobileHandler) CreateSchedule(w http.ResponseWriter, r *http.Request) {
 // @Security MobileAuth
 // @Produce json
 // @Success 200 {array} models.Schedule
-// @Router /schedules [get]
+// @Router /api/v1/schedules [get]
 func (h *MobileHandler) ListSchedules(w http.ResponseWriter, r *http.Request) {
 	userID := r.Context().Value(UserIDKey).(uint)
 	var schedules []models.Schedule
@@ -73,7 +73,7 @@ func (h *MobileHandler) ListSchedules(w http.ResponseWriter, r *http.Request) {
 // @Produce json
 // @Param id path int true "Schedule ID"
 // @Success 200 {object} DeletedIDResponse
-// @Router /schedules/{id} [delete]
+// @Router /api/v1/schedules/{id} [delete]
 func (h *MobileHandler) DeleteSchedule(w http.ResponseWriter, r *http.Request) {
 	userID := r.Context().Value(UserIDKey).(uint)
 	idStr := chi.URLParam(r, "id")

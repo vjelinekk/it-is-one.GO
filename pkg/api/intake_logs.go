@@ -21,7 +21,7 @@ func NewIntakeLogHandler(db *gorm.DB) *IntakeLogHandler {
 // @Tags IntakeLogs
 // @Security MobileAuth
 // @Success 204
-// @Router /intake-logs [post]
+// @Router /api/v1/intake-logs [post]
 func (h *IntakeLogHandler) LogIntake(w http.ResponseWriter, r *http.Request) {
 	userID := r.Context().Value(UserIDKey).(uint)
 

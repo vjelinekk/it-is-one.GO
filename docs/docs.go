@@ -15,7 +15,7 @@ const docTemplate = `{
     "host": "{{.Host}}",
     "basePath": "{{.BasePath}}",
     "paths": {
-        "/caregivers": {
+        "/api/v1/caregivers": {
             "get": {
                 "security": [
                     {
@@ -78,7 +78,7 @@ const docTemplate = `{
                 }
             }
         },
-        "/caregivers/{id}": {
+        "/api/v1/caregivers/{id}": {
             "delete": {
                 "security": [
                     {
@@ -111,7 +111,7 @@ const docTemplate = `{
                 }
             }
         },
-        "/device/heartbeat": {
+        "/api/v1/device/heartbeat": {
             "post": {
                 "security": [
                     {
@@ -146,7 +146,7 @@ const docTemplate = `{
                 }
             }
         },
-        "/health": {
+        "/api/v1/health": {
             "get": {
                 "produces": [
                     "application/json"
@@ -165,7 +165,7 @@ const docTemplate = `{
                 }
             }
         },
-        "/intake-logs": {
+        "/api/v1/intake-logs": {
             "post": {
                 "security": [
                     {
@@ -183,7 +183,7 @@ const docTemplate = `{
                 }
             }
         },
-        "/schedules": {
+        "/api/v1/schedules": {
             "get": {
                 "security": [
                     {
@@ -246,7 +246,7 @@ const docTemplate = `{
                 }
             }
         },
-        "/schedules/{id}": {
+        "/api/v1/schedules/{id}": {
             "delete": {
                 "security": [
                     {
@@ -279,7 +279,7 @@ const docTemplate = `{
                 }
             }
         },
-        "/users": {
+        "/api/v1/users": {
             "post": {
                 "consumes": [
                     "application/json"

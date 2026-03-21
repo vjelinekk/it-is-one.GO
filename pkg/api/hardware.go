@@ -24,7 +24,7 @@ func NewHardwareHandler(db *gorm.DB) *HardwareHandler {
 // @Accept json
 // @Param body body object true "Battery Level"
 // @Success 200 {string} string "OK"
-// @Router /device/heartbeat [post]
+// @Router /api/v1/device/heartbeat [post]
 func (h *HardwareHandler) Heartbeat(w http.ResponseWriter, r *http.Request) {
 	serial := r.Context().Value(DeviceSerialKey).(string)
 

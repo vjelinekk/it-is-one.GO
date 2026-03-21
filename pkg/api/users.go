@@ -35,7 +35,7 @@ type CreateUserResponse struct {
 // @Produce json
 // @Param body body CreateUserRequest true "User email"
 // @Success 201 {object} CreateUserResponse
-// @Router /users [post]
+// @Router /api/v1/users [post]
 func (h *UserHandler) Create(w http.ResponseWriter, r *http.Request) {
 	var req CreateUserRequest
 	if err := json.NewDecoder(r.Body).Decode(&req); err != nil {
@@ -67,7 +67,7 @@ type PatchUserRequest struct {
 // @Accept json
 // @Param body body PatchUserRequest true "Notification settings"
 // @Success 204
-// @Router /users [patch]
+// @Router /api/v1/users [patch]
 func (h *UserHandler) Patch(w http.ResponseWriter, r *http.Request) {
 	userID := r.Context().Value(UserIDKey).(uint)
 	var req PatchUserRequest

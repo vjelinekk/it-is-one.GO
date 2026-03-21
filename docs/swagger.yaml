@@ -63,7 +63,7 @@ info:
   title: Smart Pill Doser API
   version: "1.0"
 paths:
-  /caregivers:
+  /api/v1/caregivers:
     get:
       produces:
       - application/json
@@ -101,7 +101,7 @@ paths:
       summary: Add caregiver
       tags:
       - Caregivers
-  /caregivers/{id}:
+  /api/v1/caregivers/{id}:
     delete:
       parameters:
       - description: Caregiver ID
@@ -121,7 +121,7 @@ paths:
       summary: Delete caregiver
       tags:
       - Caregivers
-  /device/heartbeat:
+  /api/v1/device/heartbeat:
     post:
       consumes:
       - application/json
@@ -142,7 +142,7 @@ paths:
       summary: Device heartbeat
       tags:
       - Hardware
-  /health:
+  /api/v1/health:
     get:
       produces:
       - application/json
@@ -154,7 +154,7 @@ paths:
       summary: Health check
       tags:
       - System
-  /intake-logs:
+  /api/v1/intake-logs:
     post:
       responses:
         "204":
@@ -164,7 +164,7 @@ paths:
       summary: Log medication intake
       tags:
       - IntakeLogs
-  /schedules:
+  /api/v1/schedules:
     get:
       produces:
       - application/json
@@ -202,7 +202,7 @@ paths:
       summary: Create schedule
       tags:
       - Schedules
-  /schedules/{id}:
+  /api/v1/schedules/{id}:
     delete:
       parameters:
       - description: Schedule ID
@@ -222,7 +222,7 @@ paths:
       summary: Delete schedule
       tags:
       - Schedules
-  /users:
+  /api/v1/users:
     patch:
       consumes:
       - application/json

@@ -9,7 +9,7 @@
     "host": "localhost:8080",
     "basePath": "/api/v1",
     "paths": {
-        "/caregivers": {
+        "/api/v1/caregivers": {
             "get": {
                 "security": [
                     {
@@ -72,7 +72,7 @@
                 }
             }
         },
-        "/caregivers/{id}": {
+        "/api/v1/caregivers/{id}": {
             "delete": {
                 "security": [
                     {
@@ -105,7 +105,7 @@
                 }
             }
         },
-        "/device/heartbeat": {
+        "/api/v1/device/heartbeat": {
             "post": {
                 "security": [
                     {
@@ -140,7 +140,7 @@
                 }
             }
         },
-        "/health": {
+        "/api/v1/health": {
             "get": {
                 "produces": [
                     "application/json"
@@ -159,7 +159,7 @@
                 }
             }
         },
-        "/intake-logs": {
+        "/api/v1/intake-logs": {
             "post": {
                 "security": [
                     {
@@ -177,7 +177,7 @@
                 }
             }
         },
-        "/schedules": {
+        "/api/v1/schedules": {
             "get": {
                 "security": [
                     {
@@ -240,7 +240,7 @@
                 }
             }
         },
-        "/schedules/{id}": {
+        "/api/v1/schedules/{id}": {
             "delete": {
                 "security": [
                     {
@@ -273,7 +273,7 @@
                 }
             }
         },
-        "/users": {
+        "/api/v1/users": {
             "post": {
                 "consumes": [
                     "application/json"

@@ -27,7 +27,7 @@ type DeletedIDResponse struct {
 // @Produce json
 // @Param body body CaregiverRequest true "Caregiver details"
 // @Success 201 {object} CaregiverRequest
-// @Router /caregivers [post]
+// @Router /api/v1/caregivers [post]
 func (h *MobileHandler) AddCaregiver(w http.ResponseWriter, r *http.Request) {
 	userID := r.Context().Value(UserIDKey).(uint)
 	var req CaregiverRequest
@@ -56,7 +56,7 @@ func (h *MobileHandler) AddCaregiver(w http.ResponseWriter, r *http.Request) {
 // @Security MobileAuth
 // @Produce json
 // @Success 200 {array} CaregiverRequest
-// @Router /caregivers [get]
+// @Router /api/v1/caregivers [get]
 func (h *MobileHandler) ListCaregivers(w http.ResponseWriter, r *http.Request) {
 	userID := r.Context().Value(UserIDKey).(uint)
 	var caregivers []models.Caregiver
@@ -81,7 +81,7 @@ func (h *MobileHandler) ListCaregivers(w http.ResponseWriter, r *http.Request) {
 // @Produce json
 // @Param id path int true "Caregiver ID"
 // @Success 200 {object} DeletedIDResponse
-// @Router /caregivers/{id} [delete]
+// @Router /api/v1/caregivers/{id} [delete]
 func (h *MobileHandler) DeleteCaregiver(w http.ResponseWriter, r *http.Request) {
 	userID := r.Context().Value(UserIDKey).(uint)
 	idStr := chi.URLParam(r, "id")
