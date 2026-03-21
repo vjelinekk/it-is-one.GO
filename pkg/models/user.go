@@ -6,6 +6,11 @@ import (
 	"gorm.io/gorm"
 )
 
+const (
+	DefaultNotifyAfterMinutes           = 5
+	DefaultNotifyCaregiversAfterRetries = 3
+)
+
 type User struct {
 	ID        uint           `gorm:"primaryKey" json:"id"`
 	CreatedAt time.Time      `json:"created_at"`

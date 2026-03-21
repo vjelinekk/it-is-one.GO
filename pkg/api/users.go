@@ -25,7 +25,9 @@ type CreateUserRequest struct {
 
 // CreateUserResponse is the response for creating a user
 type CreateUserResponse struct {
-	ID uint `json:"id"`
+	ID                           uint `json:"id"`
+	NotifyAfterMinutes           int  `json:"notify_after_minutes"`
+	NotifyCaregiversAfterRetries int  `json:"notify_caregivers_after_retries"`
 }
 
 // Create handles creating a new user
@@ -46,11 +48,20 @@ func (h *UserHandler) Create(w http.ResponseWriter, r *http.Request) {
 	var user models.User
 	if err := h.DB.Where("email = ?", req.Email).First(&user).Error; err == nil {
 		w.Header().Set("Content-Type", "application/json")
-		json.NewEncoder(w).Encode(CreateUserResponse{ID: user.ID})
+		json.NewEncoder(w).Encode(CreateUserResponse{
+			ID:                           user.ID,
+			NotifyAfterMinutes:           user.NotifyAfterMinutes,
+			NotifyCaregiversAfterRetries: user.NotifyCaregiversAfterRetries,
+		})
 		return
 	}
 
-	user = models.User{Email: req.Email, Timezone: "Europe/Prague"}
+	user = models.User{
+		Email:                        req.Email,
+		Timezone:                     "Europe/Prague",
+		NotifyAfterMinutes:           models.DefaultNotifyAfterMinutes,
+		NotifyCaregiversAfterRetries: models.DefaultNotifyCaregiversAfterRetries,
+	}
 	if err := h.DB.Create(&user).Error; err != nil {
 		http.Error(w, err.Error(), http.StatusInternalServerError)
 		return
@@ -58,7 +69,11 @@ func (h *UserHandler) Create(w http.ResponseWriter, r *http.Request) {
 
 	w.Header().Set("Content-Type", "application/json")
 	w.WriteHeader(http.StatusCreated)
-	json.NewEncoder(w).Encode(CreateUserResponse{ID: user.ID})
+	json.NewEncoder(w).Encode(CreateUserResponse{
+		ID:                           user.ID,
+		NotifyAfterMinutes:           user.NotifyAfterMinutes,
+		NotifyCaregiversAfterRetries: user.NotifyCaregiversAfterRetries,
+	})
 }
 
 // PatchUserRequest is the payload for patching user notification settings

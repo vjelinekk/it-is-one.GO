@@ -390,6 +390,12 @@ const docTemplate = `{
             "properties": {
                 "id": {
                     "type": "integer"
+                },
+                "notify_after_minutes": {
+                    "type": "integer"
+                },
+                "notify_caregivers_after_retries": {
+                    "type": "integer"
                 }
             }
         },
