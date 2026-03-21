@@ -3,7 +3,9 @@ package api
 import (
 	"encoding/json"
 	"net/http"
+	"net/url"
 
+	"github.com/go-chi/chi/v5"
 	"github.com/vjelinekk/it-is-one.GO/pkg/email"
 	"github.com/vjelinekk/it-is-one.GO/pkg/models"
 	"github.com/vjelinekk/it-is-one.GO/pkg/sms"
@@ -135,43 +137,25 @@ func (h *MobileHandler) ListCaregivers(w http.ResponseWriter, r *http.Request) {
 	json.NewEncoder(w).Encode(caregivers)
 }
 
-// DeleteCaregiver deletes caregivers by email or phone
-// @Summary Delete caregivers
+// DeleteCaregiver deletes a caregiver by email
+// @Summary Delete caregiver
 // @Tags Caregivers
 // @Security MobileAuth
-// @Accept json
 // @Produce json
-// @Param body body CaregiverRequest true "List of caregivers to delete"
+// @Param email path string true "Caregiver email"
 // @Success 200
-// @Router /api/v1/caregivers [delete]
+// @Router /api/v1/caregivers/{email} [delete]
 func (h *MobileHandler) DeleteCaregiver(w http.ResponseWriter, r *http.Request) {
 	userID := r.Context().Value(UserIDKey).(uint)
-	var req CaregiverRequest
-	if err := json.NewDecoder(r.Body).Decode(&req); err != nil {
-		http.Error(w, "Invalid payload", http.StatusBadRequest)
+	emailParam, err := url.PathUnescape(chi.URLParam(r, "email"))
+	if err != nil || emailParam == "" {
+		http.Error(w, "Invalid email", http.StatusBadRequest)
 		return
 	}
 
-	if len(req.Caregivers) == 0 {
-		w.WriteHeader(http.StatusOK)
+	if err := h.DB.Where("patient_id = ? AND email = ?", userID, emailParam).Delete(&models.Caregiver{}).Error; err != nil {
+		http.Error(w, "Failed to delete caregiver", http.StatusInternalServerError)
 		return
-	}
-
-	for _, input := range req.Caregivers {
-		query := h.DB.Where("patient_id = ?", userID)
-		if input.Email != "" && input.Phone != "" {
-			query = query.Where("email = ? OR phone = ?", input.Email, input.Phone)
-		} else if input.Email != "" {
-			query = query.Where("email = ?", input.Email)
-		} else if input.Phone != "" {
-			query = query.Where("phone = ?", input.Phone)
-		} else {
-			continue
-		}
-		if err := query.Delete(&models.Caregiver{}).Error; err != nil {
-			http.Error(w, "Failed to delete caregiver", http.StatusInternalServerError)
-			return
-		}
 	}
 
 	w.WriteHeader(http.StatusOK)

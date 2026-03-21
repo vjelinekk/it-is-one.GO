@@ -35,7 +35,7 @@ const docTemplate = `{
                         "schema": {
                             "type": "array",
                             "items": {
-                                "$ref": "#/definitions/api.CaregiverRequest"
+                                "$ref": "#/definitions/models.Caregiver"
                             }
                         }
                     }
@@ -59,7 +59,7 @@ const docTemplate = `{
                 "summary": "Add caregivers",
                 "parameters": [
                     {
-                        "description": "List of caregiver emails",
+                        "description": "List of caregivers",
                         "name": "body",
                         "in": "body",
                         "required": true,
@@ -74,7 +74,7 @@ const docTemplate = `{
                         "schema": {
                             "type": "array",
                             "items": {
-                                "$ref": "#/definitions/api.CaregiverRequest"
+                                "$ref": "#/definitions/models.Caregiver"
                             }
                         }
                     }
@@ -98,7 +98,7 @@ const docTemplate = `{
                 "summary": "Delete caregivers",
                 "parameters": [
                     {
-                        "description": "List of caregiver emails",
+                        "description": "List of caregivers to delete",
                         "name": "body",
                         "in": "body",
                         "required": true,
@@ -109,10 +109,42 @@ const docTemplate = `{
                 ],
                 "responses": {
                     "200": {
-                        "description": "OK",
+                        "description": "OK"
+                    }
+                }
+            }
+        },
+        "/api/v1/caregivers/verify-phone": {
+            "post": {
+                "security": [
+                    {
+                        "MobileAuth": []
+                    }
+                ],
+                "consumes": [
+                    "application/json"
+                ],
+                "produces": [
+                    "application/json"
+                ],
+                "tags": [
+                    "Caregivers"
+                ],
+                "summary": "Verify caregiver phone OTP",
+                "parameters": [
+                    {
+                        "description": "Phone and OTP",
+                        "name": "body",
+                        "in": "body",
+                        "required": true,
                         "schema": {
-                            "$ref": "#/definitions/api.CaregiverRequest"
+                            "$ref": "#/definitions/api.VerifyPhoneRequest"
                         }
+                    }
+                ],
+                "responses": {
+                    "200": {
+                        "description": "OK"
                     }
                 }
             }
@@ -395,13 +427,25 @@ const docTemplate = `{
         }
     },
     "definitions": {
+        "api.CaregiverInput": {
+            "type": "object",
+            "properties": {
+                "email": {
+                    "type": "string"
+                },
+                "phone": {
+                    "description": "E.164 format e.g. +420123456789",
+                    "type": "string"
+                }
+            }
+        },
         "api.CaregiverRequest": {
             "type": "object",
             "properties": {
-                "emails": {
+                "caregivers": {
                     "type": "array",
                     "items": {
-                        "type": "string"
+                        "$ref": "#/definitions/api.CaregiverInput"
                     }
                 }
             }
@@ -481,6 +525,42 @@ const docTemplate = `{
                 },
                 "notify_caregivers_after_retries": {
                     "type": "integer"
+                }
+            }
+        },
+        "api.VerifyPhoneRequest": {
+            "type": "object",
+            "properties": {
+                "otp": {
+                    "type": "string"
+                },
+                "phone": {
+                    "type": "string"
+                }
+            }
+        },
+        "models.Caregiver": {
+            "type": "object",
+            "properties": {
+                "created_at": {
+                    "type": "string"
+                },
+                "email": {
+                    "type": "string"
+                },
+                "id": {
+                    "type": "integer"
+                },
+                "patient_id": {
+                    "description": "ref: \u003e users.id",
+                    "type": "integer"
+                },
+                "phone": {
+                    "description": "E.164 format e.g. +420123456789",
+                    "type": "string"
+                },
+                "updated_at": {
+                    "type": "string"
                 }
             }
         },
