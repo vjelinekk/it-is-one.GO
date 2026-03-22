@@ -5,4 +5,11 @@ services:
       - "8080:8080"
     env_file:
       - .env
+    logging:
+      driver: awslogs
+      options:
+        awslogs-region: eu-central-1
+        awslogs-group: /pill-doser/api
+        awslogs-create-group: "true"
+        awslogs-stream: api
     restart: unless-stopped

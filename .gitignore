@@ -36,8 +36,12 @@ Thumbs.db
 .env
 *.env.local
 
-# Terraform secrets
+# Terraform secrets and state
 infra/terraform/terraform.tfvars
+infra/terraform/.terraform/
+infra/terraform/.terraform.tfstate.lock.info
+infra/terraform/terraform.tfstate
+infra/terraform/terraform.tfstate.backup
 
 # Docker
 .docker/
