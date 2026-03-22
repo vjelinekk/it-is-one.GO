@@ -19,7 +19,7 @@ resource "aws_iam_role_policy" "ses_send" {
     Version = "2012-10-17"
     Statement = [{
       Effect   = "Allow"
-      Action   = ["ses:SendEmail", "ses:VerifyEmailIdentity", "sns:Publish", "sns:CreateSMSSandboxPhoneNumber", "sns:VerifySMSSandboxPhoneNumber"]
+      Action   = ["ses:SendEmail", "ses:VerifyEmailIdentity", "sns:Publish", "sns:CreateSMSSandboxPhoneNumber", "sns:VerifySMSSandboxPhoneNumber", "sms-voice:CreateVerifiedDestinationNumber", "sms-voice:SendDestinationNumberVerificationCode", "sms-voice:VerifyDestinationNumber", "sms-voice:SendTextMessage", "sms-voice:DescribeVerifiedDestinationNumbers"]
       Resource = "*"
     }]
   })
