@@ -26,7 +26,7 @@ import (
 
 func main() {
 	// Initialize Database
-	database, err := db.Init("data.db")
+	database, err := db.Init(os.Getenv("DATABASE_URL"))
 	if err != nil {
 		log.Fatalf("Failed to initialize database: %v", err)
 	}

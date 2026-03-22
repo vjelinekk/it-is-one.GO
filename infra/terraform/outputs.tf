@@ -7,3 +7,8 @@ output "api_url" {
   value       = "http://${aws_eip.pill_doser.public_ip}:8080"
   description = "Base URL of the API"
 }
+
+output "rds_endpoint" {
+  value       = aws_db_instance.pill_doser.endpoint
+  description = "RDS PostgreSQL endpoint"
+}

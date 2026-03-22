@@ -30,3 +30,8 @@ variable "github_repo" {
 variable "ses_from_email" {
   default = "vojtech.jelinekk@gmail.com"
 }
+
+variable "db_password" {
+  description = "RDS master password"
+  sensitive   = true
+}

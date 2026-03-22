@@ -52,10 +52,11 @@ resource "aws_instance" "pill_doser" {
     chmod +x /usr/local/bin/docker-compose
 
     git clone ${var.github_repo} /app
-    printf "SES_FROM_EMAIL=${var.ses_from_email}\nAWS_REGION=${var.aws_region}\n" > /app/.env
-    touch /app/data.db
+    printf "SES_FROM_EMAIL=${var.ses_from_email}\nAWS_REGION=${var.aws_region}\nDATABASE_URL=postgres://pilldoser:${var.db_password}@${aws_db_instance.pill_doser.endpoint}/pilldoser\n" > /app/.env
     cd /app && docker-compose up -d --build
   EOF
+
+  depends_on = [aws_db_instance.pill_doser]
 
   tags = {
     Name = "pill-doser"

@@ -36,6 +36,9 @@ Thumbs.db
 .env
 *.env.local
 
+# Terraform secrets
+infra/terraform/terraform.tfvars
+
 # Docker
 .docker/
 # (Keep Dockerfile and docker-compose.yaml as they are part of the project)
